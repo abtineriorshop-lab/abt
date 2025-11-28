@@ -69,11 +69,7 @@ function initHeroVideo() {
         heroVideo.addEventListener('loadeddata', () => {
             console.log('영상 데이터 로딩 완료');
             // 자동 재생 시도
-            heroVideo.play().catch(e => {
-                console.log('자동 재생 실패:', e);
-                // 자동 재생이 실패한 경우 사용자에게 알림
-                showVideoPlayButton();
-            });
+            safePlayHeroVideo(heroVideo);
         });
 
         heroVideo.addEventListener('error', (e) => {
@@ -94,9 +90,7 @@ function initHeroVideo() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    heroVideo.play().catch(e => {
-                        console.log('재생 실패:', e);
-                    });
+                    safePlayHeroVideo(heroVideo);
                 } else {
                     heroVideo.pause();
                 }
@@ -104,6 +98,25 @@ function initHeroVideo() {
         }, { threshold: 0.5 });
 
         observer.observe(heroVideo);
+    }
+}
+
+function safePlayHeroVideo(videoElement) {
+    if (!videoElement) return;
+    const playPromise = videoElement.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(error => {
+            if (error.name === 'AbortError') {
+                // 교차 관찰에 의해 발생할 수 있는 자연스러운 중단이므로 무시
+                return;
+            }
+            if (error.name === 'NotAllowedError') {
+                showVideoPlayButton();
+                return;
+            }
+            console.warn('영상 재생 실패:', error);
+            showVideoPlayButton();
+        });
     }
 }
 
