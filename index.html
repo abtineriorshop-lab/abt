@@ -107,14 +107,14 @@
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-video">
-            <video id="hero-video" autoplay muted loop playsinline preload="metadata" poster="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1280&q=75">
-                <!-- CDN 영상 (기본) -->
-                <source src="https://storage.googleapis.com/coverr-main/webm/Mt_Baker.webm" type="video/webm">
-                <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4">
-                <!-- 로컬 영상 (오프라인 환경 대비) -->
+            <video id="hero-video" autoplay muted loop playsinline preload="auto" poster="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1280&q=75">
+                <!-- 로컬 영상 (최우선) -->
                 <source src="./videos/hero-video.mp4" type="video/mp4">
+                <!-- CDN 영상 (백업) -->
+                <source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4" type="video/mp4">
+                <source src="https://storage.googleapis.com/coverr-main/webm/Mt_Baker.webm" type="video/webm">
                 <!-- 대체 영상 (추가 백업) -->
-                <source src="https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c0fd273d2c6d9a064f3ae35579b2bbdf&profile_id=165&oauth2_token_id=57447761" type="video/mp4">
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
             </video>
             <div class="video-fallback" aria-hidden="true">
                 <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=75" 

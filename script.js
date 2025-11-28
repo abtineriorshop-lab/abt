@@ -124,7 +124,19 @@ function initHeroVideo() {
     heroVideo.addEventListener('error', (e) => {
         const error = heroVideo.error;
         if (error) {
+            // 에러 코드:
+            // 1: MEDIA_ERR_ABORTED - 사용자가 중단
+            // 2: MEDIA_ERR_NETWORK - 네트워크 오류
+            // 3: MEDIA_ERR_DECODE - 디코딩 오류
+            // 4: MEDIA_ERR_SRC_NOT_SUPPORTED - 소스 미지원
             console.warn('영상 로딩 오류 - 코드:', error.code, '메시지:', error.message);
+            
+            // 소스 미지원이면 즉시 다음 소스로
+            if (error.code === 4) {
+                console.log('소스 미지원, 다음 소스 시도...');
+                videoState.hasError = false; // 다음 소스 시도 가능
+                return;
+            }
         } else {
             console.warn('영상 로딩 오류:', e);
         }
@@ -132,8 +144,10 @@ function initHeroVideo() {
         videoState.hasError = true;
         clearLoadTimeout();
         
-        // 모든 소스 실패 확인
-        checkAllSourcesFailed();
+        // 약간의 지연 후 모든 소스 실패 확인 (브라우저가 다음 소스를 시도할 시간 제공)
+        setTimeout(() => {
+            checkAllSourcesFailed();
+        }, 2000);
     });
 
     // 모든 소스 실패 확인
@@ -141,14 +155,34 @@ function initHeroVideo() {
         const sources = heroVideo.querySelectorAll('source');
         const currentSrc = heroVideo.currentSrc;
         
+        // networkState가 NO_SOURCE인 경우 즉시 실패 처리
+        if (heroVideo.networkState === 3) {
+            console.log('모든 영상 소스 실패 (networkState: NO_SOURCE), 대체 이미지 표시');
+            videoState.allSourcesTried = true;
+            showVideoFallback();
+            return;
+        }
+        
         // 현재 사용 중인 소스 찾기
         let currentSourceIndex = -1;
         sources.forEach((source, index) => {
             const sourceSrc = source.src || source.getAttribute('src');
-            if (sourceSrc && (currentSrc === sourceSrc || currentSrc.includes(sourceSrc.split('/').pop()))) {
-                currentSourceIndex = index;
+            if (sourceSrc && currentSrc) {
+                // 정확한 매칭 또는 URL 일부 매칭
+                if (currentSrc === sourceSrc || 
+                    currentSrc.includes(sourceSrc.split('/').pop()) ||
+                    sourceSrc.includes(currentSrc.split('/').pop())) {
+                    currentSourceIndex = index;
+                }
             }
         });
+        
+        // currentSrc가 없으면 아직 소스 선택 중
+        if (!currentSrc) {
+            console.log('영상 소스 선택 중...');
+            videoState.allSourcesTried = false;
+            return;
+        }
         
         // 마지막 소스까지 시도했는지 확인
         if (currentSourceIndex >= 0 && currentSourceIndex < sources.length - 1) {
@@ -202,32 +236,90 @@ function initHeroVideo() {
     // 페이지 로드 후 초기 상태 확인
     function checkInitialState() {
         // 현재 readyState 확인
-        console.log('초기 영상 상태 - readyState:', heroVideo.readyState, 'currentSrc:', heroVideo.currentSrc);
+        console.log('초기 영상 상태 - readyState:', heroVideo.readyState, 'currentSrc:', heroVideo.currentSrc, 'networkState:', heroVideo.networkState);
+        
+        // networkState 체크
+        // 0: EMPTY - 아직 초기화되지 않음
+        // 1: IDLE - 리소스 선택 중
+        // 2: LOADING - 데이터 로딩 중
+        // 3: NO_SOURCE - 소스를 찾을 수 없음
+        
+        if (heroVideo.networkState === 3) {
+            // NO_SOURCE - 모든 소스 실패
+            console.warn('모든 영상 소스를 찾을 수 없음');
+            videoState.hasError = true;
+            videoState.allSourcesTried = true;
+            showVideoFallback();
+            return;
+        }
         
         if (heroVideo.readyState >= 2) {
             // HAVE_CURRENT_DATA 이상이면 이미 로드됨
+            console.log('영상 이미 로드됨, 재생 시도');
             videoState.hasData = true;
             safePlayHeroVideo(heroVideo);
         } else if (heroVideo.readyState === 1) {
             // HAVE_METADATA면 메타데이터만 로드됨 (정상)
+            console.log('영상 메타데이터 로드됨, 데이터 로딩 대기');
             videoState.hasMetadata = true;
-            // preload="metadata"인 경우, 실제 데이터는 필요할 때 로드됨
-            // 뷰포트에 들어오면 자동으로 로드됨
+            // preload="auto"인 경우, 실제 데이터도 로드됨
+            // 추가 대기 후 재생 시도
+            setTimeout(() => {
+                if (heroVideo.readyState >= 2) {
+                    videoState.hasData = true;
+                    safePlayHeroVideo(heroVideo);
+                }
+            }, 1000);
         } else if (heroVideo.readyState === 0) {
             // HAVE_NOTHING - 아직 로드되지 않음
+            console.log('영상 아직 로드되지 않음, 로딩 대기...');
+            
             // 로딩 시작 시간 기록
             if (!videoState.loadStartTime) {
                 videoState.loadStartTime = Date.now();
             }
             
-            // 15초 후 타임아웃 체크
+            // networkState가 IDLE이면 강제로 로드 시도
+            if (heroVideo.networkState === 1) {
+                console.log('영상 강제 로드 시도');
+                try {
+                    heroVideo.load();
+                } catch (e) {
+                    console.warn('영상 로드 시도 실패:', e);
+                }
+            }
+            
+            // 5초 후 재확인
             videoState.timeoutId = setTimeout(() => {
-                checkLoadTimeout();
-            }, 15000);
+                if (heroVideo.readyState === 0 && !videoState.hasMetadata && !videoState.hasData) {
+                    // networkState 재확인
+                    if (heroVideo.networkState === 3) {
+                        // NO_SOURCE - 모든 소스 실패
+                        console.warn('영상 로딩 시간 초과 (5초), 모든 소스 실패');
+                        checkAllSourcesFailed();
+                    } else if (heroVideo.networkState === 1 || heroVideo.networkState === 2) {
+                        // IDLE 또는 LOADING - 아직 로딩 중
+                        console.log('영상 아직 로딩 중, 추가 대기...');
+                        // 5초 더 대기
+                        videoState.timeoutId = setTimeout(() => {
+                            if (heroVideo.readyState === 0 && !videoState.hasMetadata && !videoState.hasData) {
+                                console.warn('영상 로딩 시간 초과 (총 10초), 모든 소스 실패 확인');
+                                checkAllSourcesFailed();
+                            }
+                        }, 5000);
+                    } else {
+                        // 기타 상태
+                        console.warn('영상 로딩 시간 초과 (5초), 모든 소스 실패 확인');
+                        checkAllSourcesFailed();
+                    }
+                }
+            }, 5000);
         }
         
         // 에러 상태 확인
         if (heroVideo.error) {
+            const error = heroVideo.error;
+            console.warn('영상 에러 감지 - 코드:', error.code, '메시지:', error.message);
             videoState.hasError = true;
             checkAllSourcesFailed();
         }
@@ -236,11 +328,11 @@ function initHeroVideo() {
     // DOMContentLoaded 또는 load 이벤트에서 초기 상태 확인
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkInitialState, 500);
+            setTimeout(checkInitialState, 1000);
         });
     } else {
         // 이미 로드된 경우
-        setTimeout(checkInitialState, 500);
+        setTimeout(checkInitialState, 1000);
     }
 
     // 뷰포트에 있을 때만 재생하여 대역폭 절약
@@ -252,15 +344,32 @@ function initHeroVideo() {
                     safePlayHeroVideo(heroVideo);
                 } else if (heroVideo.readyState === 1) {
                     // 메타데이터만 로드된 경우, 실제 데이터 로드 시작
+                    console.log('뷰포트 진입, 영상 데이터 로드 시작');
+                    heroVideo.load();
+                } else if (heroVideo.readyState === 0) {
+                    // 아직 로드되지 않은 경우, 강제 로드
+                    console.log('뷰포트 진입, 영상 강제 로드');
                     heroVideo.load();
                 }
             } else {
                 heroVideo.pause();
             }
         });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.1 }); // threshold를 낮춰서 더 빨리 감지
 
     observer.observe(heroVideo);
+    
+    // 추가: 영상이 로드되면 즉시 재생 시도
+    heroVideo.addEventListener('loadeddata', () => {
+        if (heroVideo.readyState >= 2) {
+            // 뷰포트에 있는지 확인
+            const rect = heroVideo.getBoundingClientRect();
+            const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+            if (isVisible) {
+                safePlayHeroVideo(heroVideo);
+            }
+        }
+    });
 }
 
 function safePlayHeroVideo(videoElement) {
