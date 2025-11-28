@@ -123,23 +123,50 @@ function initHeroVideo() {
     // 영상 로딩 오류
     heroVideo.addEventListener('error', (e) => {
         const error = heroVideo.error;
+        const sources = heroVideo.querySelectorAll('source');
+        const currentSrc = heroVideo.currentSrc;
+        
         if (error) {
             // 에러 코드:
             // 1: MEDIA_ERR_ABORTED - 사용자가 중단
-            // 2: MEDIA_ERR_NETWORK - 네트워크 오류
+            // 2: MEDIA_ERR_NETWORK - 네트워크 오류 (404 포함)
             // 3: MEDIA_ERR_DECODE - 디코딩 오류
             // 4: MEDIA_ERR_SRC_NOT_SUPPORTED - 소스 미지원
-            console.warn('로컬 영상 로딩 오류 - 코드:', error.code, '메시지:', error.message);
+            console.warn('영상 로딩 오류 - 코드:', error.code, '메시지:', error.message, '시도한 경로:', currentSrc);
+            
+            // 네트워크 오류(404 등)이고 아직 시도하지 않은 소스가 있으면 다음 소스 시도
+            if (error.code === 2 && sources.length > 1) {
+                // 현재 실패한 소스 찾기
+                let currentIndex = -1;
+                sources.forEach((source, index) => {
+                    const sourceSrc = source.src || source.getAttribute('src');
+                    if (currentSrc && (currentSrc === sourceSrc || currentSrc.includes(sourceSrc.split('/').pop()))) {
+                        currentIndex = index;
+                    }
+                });
+                
+                // 다음 소스가 있으면 브라우저가 자동으로 시도하므로 대기
+                if (currentIndex >= 0 && currentIndex < sources.length - 1) {
+                    console.log(`소스 ${currentIndex + 1} 실패 (404), 다음 소스 시도 중...`);
+                    videoState.hasError = false; // 다음 소스 시도 가능
+                    return;
+                }
+            }
         } else {
-            console.warn('로컬 영상 로딩 오류:', e);
+            console.warn('영상 로딩 오류:', e);
         }
         
+        // 모든 소스가 실패한 경우
         videoState.hasError = true;
         clearLoadTimeout();
         
-        // 로컬 영상만 사용하므로 즉시 대체 이미지 표시
-        console.log('로컬 영상 로딩 실패, 대체 이미지 표시');
-        showVideoFallback();
+        // 약간의 지연 후 확인 (브라우저가 다음 소스를 시도할 시간 제공)
+        setTimeout(() => {
+            if (heroVideo.networkState === 3 || heroVideo.error) {
+                console.log('모든 영상 소스 실패, 대체 이미지 표시');
+                showVideoFallback();
+            }
+        }, 2000);
     });
 
     // 로컬 영상 실패 확인 (로컬 영상만 사용하므로 단순화)
@@ -205,9 +232,11 @@ function initHeroVideo() {
         // 2: LOADING - 데이터 로딩 중
         // 3: NO_SOURCE - 소스를 찾을 수 없음
         
-        if (heroVideo.networkState === 3) {
+        // networkState가 3이고 readyState가 0이면 모든 소스 실패
+        if (heroVideo.networkState === 3 && heroVideo.readyState === 0) {
             // NO_SOURCE - 로컬 영상 실패
-            console.warn('로컬 영상 소스를 찾을 수 없음, 대체 이미지 표시');
+            console.warn('로컬 영상 소스를 찾을 수 없음 (404 또는 파일 없음), 대체 이미지 표시');
+            console.warn('시도한 경로:', heroVideo.currentSrc || '없음');
             videoState.hasError = true;
             videoState.allSourcesTried = true;
             showVideoFallback();
