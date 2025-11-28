@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가구 - 밝은내일</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="page-styles.css">
+    <link rel="stylesheet" href="product-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">
+                    <h1>밝은내일</h1>
+                    <span class="logo-subtitle">BRIGHT FUTURE</span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">HOME</a>
+                </li>
+                <li class="nav-item">
+                    <a href="about.html" class="nav-link">ABOUT</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">제품소개 <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="products-outdoor.html">야외시설</a></li>
+                        <li><a href="products-lighting.html">조명시스템</a></li>
+                        <li><a href="products-furniture.html" class="active">가구</a></li>
+                        <li><a href="products-flooring.html">바닥재</a></li>
+                        <li><a href="products-wall.html">벽재</a></li>
+                        <li><a href="products-accessories.html">액세서리</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a href="portfolio.html" class="nav-link">PORTFOLIO</a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link">CONTACT</a>
+                </li>
+            </ul>
+            <div class="nav-actions">
+                <a href="#" class="nav-icon"><i class="fas fa-search"></i></a>
+                <a href="#" class="nav-icon"><i class="fas fa-heart"></i></a>
+                <a href="#" class="nav-icon"><i class="fas fa-shopping-bag"></i></a>
+            </div>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <div class="breadcrumb">
+                    <a href="index.html">홈</a>
+                    <span>/</span>
+                    <a href="#">제품소개</a>
+                    <span>/</span>
+                    <span>가구</span>
+                </div>
+                <h1 class="page-title">가구</h1>
+                <p class="page-subtitle">공간의 기능과 아름다움을 완성하는 전문 가구로 특별한 인테리어를 만들어보세요</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Filters -->
+    <section class="product-filters">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">전체</button>
+                <button class="filter-tab" data-filter="seating">좌석가구</button>
+                <button class="filter-tab" data-filter="table">테이블</button>
+                <button class="filter-tab" data-filter="storage">수납가구</button>
+                <button class="filter-tab" data-filter="bedroom">침실가구</button>
+                <button class="filter-tab" data-filter="outdoor">야외가구</button>
+            </div>
+            
+            <div class="filter-controls">
+                <div class="sort-controls">
+                    <label for="sort">정렬:</label>
+                    <select id="sort">
+                        <option value="popular">인기순</option>
+                        <option value="price-low">가격 낮은순</option>
+                        <option value="price-high">가격 높은순</option>
+                        <option value="newest">최신순</option>
+                    </select>
+                </div>
+                <div class="view-controls">
+                    <button class="view-btn active" data-view="grid"><i class="fas fa-th"></i></button>
+                    <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products-section">
+        <div class="container">
+            <div class="products-grid" id="productsGrid">
+                <!-- 좌석가구 제품들 -->
+                <div class="product-card" data-category="seating" data-price="450000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="모던 소파">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('seating-1')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-badge">인기</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">좌석가구</div>
+                        <h3 class="product-title">모던 3인용 소파</h3>
+                        <p class="product-description">세련된 디자인의 3인용 소파로 거실의 중심이 되는 편안한 휴식 공간을 제공합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 210cm x 90cm</span>
+                            <span><i class="fas fa-tree"></i> 원목+천</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">450,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('seating-1')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="seating" data-price="280000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1503602642458-232111445657?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="아크 체어">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('seating-2')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-badge new">신제품</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">좌석가구</div>
+                        <h3 class="product-title">아크 체어</h3>
+                        <p class="product-description">우아한 곡선의 아크 체어로 공간에 세련미를 더하는 특별한 좌석을 제공합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 60cm x 60cm</span>
+                            <span><i class="fas fa-tree"></i> 원목</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">280,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('seating-2')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 테이블 제품들 -->
+                <div class="product-card" data-category="table" data-price="350000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1617098900591-3f90928e8c54?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="다이닝 테이블">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('table-1')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">테이블</div>
+                        <h3 class="product-title">원목 다이닝 테이블</h3>
+                        <p class="product-description">고품질 원목으로 제작된 6인용 다이닝 테이블로 가족의 소중한 식사 시간을 더욱 특별하게 만듭니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 180cm x 90cm</span>
+                            <span><i class="fas fa-tree"></i> 월넛 원목</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">350,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('table-1')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="table" data-price="180000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1611269154421-4e27233ac5c7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="사이드 테이블">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('table-2')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">테이블</div>
+                        <h3 class="product-title">모던 사이드 테이블</h3>
+                        <p class="product-description">미니멀한 디자인의 사이드 테이블로 공간을 효율적으로 활용하면서도 세련된 분위기를 연출합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 50cm x 50cm</span>
+                            <span><i class="fas fa-tree"></i> MDF+메탈</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">180,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('table-2')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 수납가구 제품들 -->
+                <div class="product-card" data-category="storage" data-price="320000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1594620302200-9a762244a156?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="책장">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('storage-1')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">수납가구</div>
+                        <h3 class="product-title">월 스타일 책장</h3>
+                        <p class="product-description">벽면을 활용한 월 스타일 책장으로 공간을 효율적으로 사용하면서도 아름다운 수납 공간을 제공합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 200cm x 30cm</span>
+                            <span><i class="fas fa-tree"></i> 원목</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">320,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('storage-1')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" data-category="storage" data-price="250000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="드레서">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('storage-2')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">수납가구</div>
+                        <h3 class="product-title">모던 드레서</h3>
+                        <p class="product-description">넓은 수납 공간과 거울이 함께 있는 드레서로 침실의 필수 가구를 완성합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 120cm x 45cm</span>
+                            <span><i class="fas fa-tree"></i> MDF+거울</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">250,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('storage-2')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 침실가구 제품들 -->
+                <div class="product-card" data-category="bedroom" data-price="680000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="침대">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('bedroom-1')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">침실가구</div>
+                        <h3 class="product-title">퀸사이즈 침대</h3>
+                        <p class="product-description">편안한 수면을 위한 퀸사이즈 침대로 하루의 피로를 풀어주는 완벽한 휴식 공간을 제공합니다.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 200cm x 160cm</span>
+                            <span><i class="fas fa-tree"></i> 원목+천</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">680,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('bedroom-1')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 야외가구 제품들 -->
+                <div class="product-card" data-category="outdoor" data-price="220000">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1600210492493-0946911123ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2016&q=80" alt="야외 테이블 세트">
+                        <div class="product-overlay">
+                            <button class="quick-view-btn" onclick="openProductModal('outdoor-1')">
+                                <i class="fas fa-eye"></i> 빠른보기
+                            </button>
+                            <button class="wishlist-btn">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">야외가구</div>
+                        <h3 class="product-title">야외 테이블 세트</h3>
+                        <p class="product-description">날씨에 강한 야외용 테이블과 의자 세트로 테라스나 정원에서 편안한 야외 생활을 즐기세요.</p>
+                        <div class="product-specs">
+                            <span><i class="fas fa-ruler"></i> 120cm x 80cm</span>
+                            <span><i class="fas fa-tree"></i> 방부목</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="price">220,000원</span>
+                            <span class="price-unit">부터</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn btn-primary" onclick="openProductModal('outdoor-1')">상세보기</button>
+                            <button class="btn btn-secondary">견적문의</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-section">
+                <button class="btn btn-secondary load-more-btn">
+                    <span>더 많은 제품 보기</span>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Modal -->
+    <div class="product-modal" id="productModal">
+        <div class="modal-overlay" onclick="closeProductModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeProductModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body" id="modalBody">
+                <!-- 제품 상세 정보가 여기에 동적으로 로드됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section main">
+                    <div class="footer-logo">
+                        <h3>밝은내일</h3>
+                        <span>BRIGHT FUTURE</span>
+                    </div>
+                    <p>펜션, 카페, 카라반, 캠핑장 등 특수 공간에 특화된 전문 인테리어 솔루션을 제공합니다.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-pinterest"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>빠른 링크</h4>
+                    <ul>
+                        <li><a href="index.html">홈</a></li>
+                        <li><a href="about.html">회사소개</a></li>
+                        <li><a href="portfolio.html">포트폴리오</a></li>
+                        <li><a href="contact.html">문의하기</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>제품소개</h4>
+                    <ul>
+                        <li><a href="products-outdoor.html">야외시설</a></li>
+                        <li><a href="products-lighting.html">조명시스템</a></li>
+                        <li><a href="products-furniture.html">가구</a></li>
+                        <li><a href="products-flooring.html">바닥재</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>연락처 정보</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> 010-2212-7714</p>
+                        <p><i class="fas fa-envelope"></i> q886654@naver.com</p>
+                        <p><i class="fas fa-map-marker-alt"></i> 세종특별자치시 해밀3로 90</p>
+                        <p><i class="fas fa-user"></i> 대표: 허진영</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <div class="company-info">
+                        <p><strong>상호:</strong> 밝은내일 | <strong>대표:</strong> 허진영 | <strong>개인정보관리책임자:</strong> 허진영</p>
+                        <p><strong>전화:</strong> 010-2212-7714 | <strong>이메일:</strong> q886654@naver.com</p>
+                        <p><strong>주소:</strong> 세종특별자치시 해밀3로 90 | <strong>사업자등록번호:</strong> 629-50-00640 | <strong>통신판매:</strong> 제 2021-대전서구-0215 호</p>
+                        <p>&copy; 2024 밝은내일. All rights reserved.</p>
+                    </div>
+                    <div class="footer-links">
+                        <a href="#">안전구매(에스크로) 서비스</a>
+                        <a href="#">가맹점이용약관</a>
+                        <a href="#">개인정보처리방침</a>
+                        <a href="#">사업자정보확인</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="product-script.js"></script>
+</body>
+</html>

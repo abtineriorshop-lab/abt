@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin-*.html
+Disallow: /data/
+Disallow: /docs/
+
+Sitemap: https://brightfuture.kr/sitemap.xml
+

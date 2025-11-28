@@ -1,0 +1,71 @@
+{
+  "projects": [
+    {
+      "id": "pension-forest",
+      "title": "산속 펜션 인테리어",
+      "category": "pension",
+      "highlighted": true,
+      "location": "강원도 인제",
+      "area": "420㎡",
+      "duration": "12주",
+      "description": "자연과 조화를 이루는 우드 톤과 파고라, 야외 조명 패키지를 적용해 사계절 이용이 가능한 휴식 공간을 완성했습니다.",
+      "tags": ["객실 인테리어", "야외정자", "조명 패키지"],
+      "cover": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=2016&q=80",
+      "products": ["클래식 야외정자", "LED 스트링 라이트"],
+      "metrics": {
+        "occupancy": "+32%",
+        "reviewScore": "4.9/5"
+      }
+    },
+    {
+      "id": "cafe-modern",
+      "title": "모던 카페 인테리어",
+      "category": "cafe",
+      "highlighted": false,
+      "location": "서울 성수",
+      "area": "350㎡",
+      "duration": "9주",
+      "description": "콘크리트 텍스처와 우드 요소, 라인 조명을 조합해 매장 동선을 명확히 정의하고 인스타그래머블한 포인트를 강화했습니다.",
+      "tags": ["모던 디자인", "인스타그램 스팟"],
+      "cover": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=2016&q=80",
+      "products": ["모던 파고라", "스마트 데스크 램프"],
+      "metrics": {
+        "dailyVisitors": "+48%",
+        "snsMentions": "2.1K"
+      }
+    },
+    {
+      "id": "caravan",
+      "title": "카라반 인테리어",
+      "category": "caravan",
+      "highlighted": false,
+      "location": "경기도 가평",
+      "area": "18㎡",
+      "duration": "4주",
+      "description": "소형 공간에 맞는 접이식 가구와 간접 조명을 설계하여 체류감을 높이고, 이동 환경에서도 안전한 마감재를 적용했습니다.",
+      "tags": ["공간 최적화", "모바일 라이프"],
+      "cover": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=2016&q=80",
+      "products": ["모던 3인용 소파", "LED 스트링 라이트"],
+      "metrics": {
+        "bookingRate": "+27%"
+      }
+    },
+    {
+      "id": "camping",
+      "title": "캠핑장 시설",
+      "category": "camping",
+      "highlighted": false,
+      "location": "제주 서귀포",
+      "area": "1,200㎡",
+      "duration": "14주",
+      "description": "데크, 파고라, 조명 시스템을 통합 설계하여 안전성과 동선을 강화하고 가족 단위 고객을 위한 공용 라운지를 구성했습니다.",
+      "tags": ["야외 시설", "가족 친화"],
+      "cover": "https://images.unsplash.com/photo-1487730116645-74489c95b41b?auto=format&fit=crop&w=2016&q=80",
+      "products": ["컴포지트 데크", "클래식 파고라"],
+      "metrics": {
+        "repeatVisitors": "+35%"
+      }
+    }
+  ]
+}
+

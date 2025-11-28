@@ -1,0 +1,44 @@
+{
+  "testimonials": [
+    {
+      "id": "testimonial-1",
+      "authorName": "김○○",
+      "authorTitle": "강원도 펜션 사장",
+      "content": "밝은내일과 함께한 펜션 인테리어 프로젝트가 정말 만족스럽습니다. 자연과 조화를 이루는 디자인으로 손님들이 정말 좋아하시네요.",
+      "rating": 5,
+      "projectId": "pension-forest",
+      "productIds": [],
+      "status": "approved",
+      "order": 1,
+      "createdAt": "2024-01-15",
+      "updatedAt": "2024-01-15"
+    },
+    {
+      "id": "testimonial-2",
+      "authorName": "이○○",
+      "authorTitle": "서울 카페 사장",
+      "content": "대형카페 인테리어를 맡겨드렸는데, 트렌디하고 세련된 디자인으로 고객들이 정말 많이 찾아주시고 있어요. 감사합니다!",
+      "rating": 5,
+      "projectId": "cafe-modern",
+      "productIds": [],
+      "status": "approved",
+      "order": 2,
+      "createdAt": "2024-01-10",
+      "updatedAt": "2024-01-10"
+    },
+    {
+      "id": "testimonial-3",
+      "authorName": "박○○",
+      "authorTitle": "카라반 사업자",
+      "content": "카라반 인테리어로 작은 공간을 최대한 활용할 수 있게 해주셔서 정말 감사합니다. 완벽한 공간이 완성되었어요.",
+      "rating": 5,
+      "projectId": "caravan",
+      "productIds": [],
+      "status": "approved",
+      "order": 3,
+      "createdAt": "2024-01-05",
+      "updatedAt": "2024-01-05"
+    }
+  ]
+}
+

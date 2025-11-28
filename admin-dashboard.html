@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 밝은내일</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 헤더 -->
+        <header class="admin-header">
+            <div class="header-left">
+                <h1>관리자 대시보드</h1>
+                <span class="header-subtitle">밝은내일 제품 관리</span>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="admin-name">관리자</span>
+                    <div class="user-dropdown">
+                        <button class="user-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="#" id="logoutLink">
+                                <i class="fas fa-sign-out-alt"></i>
+                                로그아웃
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 컨텐츠 -->
+        <main class="admin-main">
+            <!-- 탭 네비게이션 -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="products">
+                    <i class="fas fa-box"></i> 제품 관리
+                </button>
+                <button class="tab-btn" data-tab="portfolio">
+                    <i class="fas fa-images"></i> 포트폴리오
+                </button>
+                <button class="tab-btn" data-tab="testimonials">
+                    <i class="fas fa-comments"></i> 고객 후기
+                </button>
+                <button class="tab-btn" data-tab="leads">
+                    <i class="fas fa-envelope"></i> 문의 관리
+                </button>
+            </div>
+
+            <!-- 통계 카드 -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalProducts">0</h3>
+                        <p>총 제품 수</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="activeProducts">0</h3>
+                        <p>활성 제품</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="outOfStockProducts">0</h3>
+                        <p>품절 제품</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="featuredProducts">0</h3>
+                        <p>대표 제품</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 제품 관리 섹션 -->
+            <div class="content-section tab-content active" id="productsTab">
+                <div class="section-header">
+                    <h2>제품 관리</h2>
+                    <button class="btn btn-primary" id="addProductBtn">
+                        <i class="fas fa-plus"></i>
+                        새 제품 추가
+                    </button>
+                </div>
+
+                <!-- 필터 바 -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>카테고리</label>
+                        <select id="categoryFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="outdoor">야외시설</option>
+                            <option value="furniture">가구</option>
+                            <option value="lighting">조명시스템</option>
+                            <option value="flooring">바닥재</option>
+                            <option value="wall">벽재</option>
+                            <option value="accessories">액세서리</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>상태</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                            <option value="out-of-stock">품절</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="searchInput" class="form-input" placeholder="제품명 또는 설명 검색...">
+                    </div>
+                </div>
+
+                <!-- 제품 테이블 -->
+                <div class="table-container">
+                    <table class="data-table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAllProducts" title="전체 선택">
+                                </th>
+                                <th>이미지</th>
+                                <th>제품명</th>
+                                <th>카테고리</th>
+                                <th>서브카테고리</th>
+                                <th>가격</th>
+                                <th>재고</th>
+                                <th>상태</th>
+                                <th>대표</th>
+                                <th>액션</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <!-- 제품 데이터가 여기에 동적으로 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 대량 편집 바 -->
+                <div class="bulk-edit-bar" id="bulkEditBar" style="display: none;">
+                    <div class="bulk-edit-info">
+                        <span id="bulkEditCount">0</span>개 제품 선택됨
+                    </div>
+                    <div class="bulk-edit-actions">
+                        <select id="bulkEditAction" class="form-select">
+                            <option value="">작업 선택...</option>
+                            <option value="status">상태 변경</option>
+                            <option value="category">카테고리 변경</option>
+                            <option value="featured">대표 제품 설정/해제</option>
+                            <option value="price">가격 일괄 변경</option>
+                            <option value="stock">재고 일괄 변경</option>
+                        </select>
+                        <div id="bulkEditValueContainer" style="display: none;">
+                            <input type="text" id="bulkEditValue" class="form-input" placeholder="값 입력">
+                        </div>
+                        <button class="btn btn-primary" id="applyBulkEditBtn">적용</button>
+                        <button class="btn btn-secondary" id="cancelBulkEditBtn">취소</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 포트폴리오 관리 섹션 -->
+            <div class="content-section tab-content" id="portfolioTab">
+                <div class="section-header">
+                    <h2>포트폴리오 관리</h2>
+                    <button class="btn btn-primary" id="addPortfolioBtn">
+                        <i class="fas fa-plus"></i>
+                        새 프로젝트 추가
+                    </button>
+                </div>
+
+                <!-- 필터 바 -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>카테고리</label>
+                        <select id="portfolioCategoryFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="pension">펜션</option>
+                            <option value="cafe">대형카페</option>
+                            <option value="caravan">카라반</option>
+                            <option value="camping">캠핑장</option>
+                            <option value="outdoor">야외시설</option>
+                            <option value="lighting">조명시스템</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>하이라이트</label>
+                        <select id="portfolioHighlightFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="true">하이라이트</option>
+                            <option value="false">일반</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="portfolioSearchInput" class="form-input" placeholder="프로젝트명 또는 설명 검색...">
+                    </div>
+                </div>
+
+                <!-- 포트폴리오 그리드 -->
+                <div class="portfolio-grid-admin" id="portfolioGridAdmin">
+                    <!-- 포트폴리오 데이터가 여기에 동적으로 로드됩니다 -->
+                </div>
+            </div>
+
+            <!-- 고객 후기 관리 섹션 -->
+            <div class="content-section tab-content" id="testimonialsTab">
+                <div class="section-header">
+                    <h2>고객 후기 관리</h2>
+                    <button class="btn btn-primary" id="addTestimonialBtn">
+                        <i class="fas fa-plus"></i>
+                        새 후기 추가
+                    </button>
+                </div>
+
+                <!-- 필터 바 -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>승인 상태</label>
+                        <select id="testimonialStatusFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="approved">승인됨</option>
+                            <option value="pending">대기 중</option>
+                            <option value="rejected">거부됨</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>프로젝트</label>
+                        <select id="testimonialProjectFilter" class="form-select">
+                            <option value="">전체</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="testimonialSearchInput" class="form-input" placeholder="작성자명 또는 내용 검색...">
+                    </div>
+                </div>
+
+                <!-- 고객 후기 목록 -->
+                <div class="testimonials-list-admin" id="testimonialsListAdmin">
+                    <!-- 고객 후기 데이터가 여기에 동적으로 로드됩니다 -->
+                </div>
+            </div>
+
+            <!-- 문의/리드 관리 섹션 -->
+            <div class="content-section tab-content" id="leadsTab">
+                <div class="section-header">
+                    <h2>문의/리드 관리</h2>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="refreshLeadsBtn">
+                            <i class="fas fa-sync-alt"></i> 새로고침
+                        </button>
+                        <button class="btn btn-danger" id="deleteSelectedLeadsBtn" style="display: none;">
+                            <i class="fas fa-trash"></i> 선택 삭제
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 필터 바 -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>상태</label>
+                        <select id="leadStatusFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="new">신규</option>
+                            <option value="in-progress">진행중</option>
+                            <option value="completed">완료</option>
+                            <option value="archived">보관</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>프로젝트 유형</label>
+                        <select id="leadProjectTypeFilter" class="form-select">
+                            <option value="">전체</option>
+                            <option value="pension">펜션</option>
+                            <option value="cafe">대형카페</option>
+                            <option value="caravan">카라반</option>
+                            <option value="camping">캠핑장</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="leadSearchInput" class="form-input" placeholder="이름, 이메일, 전화번호 검색...">
+                    </div>
+                </div>
+
+                <!-- 문의 목록 -->
+                <div class="table-container">
+                    <table class="data-table" id="leadsTable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <input type="checkbox" id="selectAllLeads" title="전체 선택">
+                                </th>
+                                <th>날짜</th>
+                                <th>이름</th>
+                                <th>연락처</th>
+                                <th>프로젝트 유형</th>
+                                <th>제품</th>
+                                <th>상태</th>
+                                <th>액션</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsTableBody">
+                            <!-- 문의 데이터가 여기에 동적으로 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 포트폴리오 모달 -->
+    <div class="modal-overlay" id="portfolioModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="portfolioModalTitle">새 프로젝트 추가</h3>
+                <button class="modal-close" id="portfolioModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="portfolioForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>프로젝트 제목</label>
+                            <input type="text" id="portfolioTitle" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>카테고리</label>
+                            <select id="portfolioCategory" class="form-input" required>
+                                <option value="">선택하세요</option>
+                                <option value="pension">펜션</option>
+                                <option value="cafe">대형카페</option>
+                                <option value="caravan">카라반</option>
+                                <option value="camping">캠핑장</option>
+                                <option value="outdoor">야외시설</option>
+                                <option value="lighting">조명시스템</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>위치</label>
+                            <input type="text" id="portfolioLocation" class="form-input" placeholder="예: 강원도 인제">
+                        </div>
+                        <div class="form-group">
+                            <label>면적</label>
+                            <input type="text" id="portfolioArea" class="form-input" placeholder="예: 420㎡">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>소요 기간</label>
+                            <input type="text" id="portfolioDuration" class="form-input" placeholder="예: 12주">
+                        </div>
+                        <div class="form-group">
+                            <label>하이라이트</label>
+                            <label class="featured-toggle">
+                                <input type="checkbox" id="portfolioHighlighted">
+                                <span>포트폴리오 페이지에 대형으로 표시</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>설명</label>
+                        <textarea id="portfolioDescription" class="form-input" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>태그 (쉼표로 구분)</label>
+                        <input type="text" id="portfolioTags" class="form-input" placeholder="예: 객실 인테리어, 야외정자, 조명 패키지">
+                    </div>
+                    <div class="form-group">
+                        <label>커버 이미지 URL</label>
+                        <input type="url" id="portfolioCover" class="form-input">
+                        <div class="image-preview" id="portfolioCoverPreview"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>추가 이미지 URL (줄바꿈으로 구분, 최대 10개)</label>
+                        <textarea id="portfolioImages" class="form-input" rows="3" placeholder="https://...&#10;https://..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>사용된 제품 (제품 ID, 쉼표로 구분)</label>
+                        <input type="text" id="portfolioProducts" class="form-input" placeholder="예: gazebo-1, lighting-1">
+                    </div>
+                    <div class="form-group">
+                        <label>성과 지표 (JSON 형식)</label>
+                        <textarea id="portfolioMetrics" class="form-input" rows="3" placeholder='{"occupancy": "+32%", "reviewScore": "4.9/5"}'></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="portfolioCancelBtn">취소</button>
+                <button type="submit" form="portfolioForm" class="btn btn-primary" id="portfolioSaveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 고객 후기 모달 -->
+    <div class="modal-overlay" id="testimonialModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="testimonialModalTitle">새 후기 추가</h3>
+                <button class="modal-close" id="testimonialModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="testimonialForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>작성자 이름</label>
+                            <input type="text" id="testimonialAuthorName" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>직업/직함</label>
+                            <input type="text" id="testimonialAuthorTitle" class="form-input" placeholder="예: 강원도 펜션 사장">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>후기 내용</label>
+                        <textarea id="testimonialContent" class="form-input" rows="5" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>평점 (1-5점)</label>
+                            <select id="testimonialRating" class="form-input">
+                                <option value="5">5점</option>
+                                <option value="4">4점</option>
+                                <option value="3">3점</option>
+                                <option value="2">2점</option>
+                                <option value="1">1점</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>연결된 프로젝트</label>
+                            <select id="testimonialProjectId" class="form-input">
+                                <option value="">선택 안 함</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>승인 상태</label>
+                            <select id="testimonialStatus" class="form-input">
+                                <option value="pending">대기 중</option>
+                                <option value="approved">승인됨</option>
+                                <option value="rejected">거부됨</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>표시 순서</label>
+                            <input type="number" id="testimonialOrder" class="form-input" value="1" min="1">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="testimonialCancelBtn">취소</button>
+                <button type="submit" form="testimonialForm" class="btn btn-primary" id="testimonialSaveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 문의 상세 모달 -->
+    <div class="modal-overlay" id="leadDetailModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <h3 id="leadDetailModalTitle">문의 상세</h3>
+                <button class="modal-close" id="leadDetailModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="leadDetailContent">
+                    <!-- 문의 상세 내용이 여기에 동적으로 로드됩니다 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="leadDetailCloseBtn">닫기</button>
+                <button type="button" class="btn btn-primary" id="leadStatusUpdateBtn">상태 업데이트</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제품 모달 -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">새 제품 추가</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <!-- 탭 네비게이션 -->
+                    <div class="modal-tabs">
+                        <button type="button" class="modal-tab-btn active" data-tab="basic">기본 정보</button>
+                        <button type="button" class="modal-tab-btn" data-tab="images">이미지</button>
+                        <button type="button" class="modal-tab-btn" data-tab="details">상세 정보</button>
+                    </div>
+
+                    <!-- 기본 정보 탭 -->
+                    <div class="modal-tab-content active" id="productTabBasic">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>제품명</label>
+                                <input type="text" id="productName" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>카테고리</label>
+                                <select id="productCategory" class="form-input" required>
+                                    <option value="">선택하세요</option>
+                                    <option value="outdoor">야외시설</option>
+                                    <option value="lighting">조명시스템</option>
+                                    <option value="furniture">가구</option>
+                                    <option value="flooring">바닥재</option>
+                                    <option value="wall">벽재</option>
+                                    <option value="accessories">액세서리</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>서브카테고리</label>
+                                <input type="text" id="productSubcategory" class="form-input" placeholder="예: gazebo, sofa, led">
+                            </div>
+                            <div class="form-group">
+                                <label>상태</label>
+                                <select id="productStatus" class="form-input">
+                                    <option value="active">활성</option>
+                                    <option value="inactive">비활성</option>
+                                    <option value="out-of-stock">품절</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>가격 (원)</label>
+                                <input type="number" id="productPrice" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>재고</label>
+                                <input type="number" id="productStock" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>설명</label>
+                            <textarea id="productDescription" class="form-input" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>짧은 설명 (인덱스 페이지용)</label>
+                            <textarea id="productShortDescription" class="form-input" rows="2"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>크기</label>
+                                <input type="text" id="productSize" class="form-input" placeholder="예: 3m x 3m">
+                            </div>
+                            <div class="form-group">
+                                <label>재질</label>
+                                <input type="text" id="productMaterial" class="form-input" placeholder="예: 목재, 알루미늄">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>배지 (인기, 신제품 등)</label>
+                                <input type="text" id="productBadge" class="form-input" placeholder="예: 인기, 신제품">
+                            </div>
+                            <div class="form-group">
+                                <label>대표 제품</label>
+                                <label class="featured-toggle">
+                                    <input type="checkbox" id="productFeatured">
+                                    <span>인덱스 페이지에 표시</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 이미지 탭 -->
+                    <div class="modal-tab-content" id="productTabImages">
+                        <div class="form-group">
+                            <label>메인 이미지 URL</label>
+                            <input type="url" id="productImage" class="form-input" placeholder="https://...">
+                            <div class="image-preview" id="productImagePreview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>추가 이미지</label>
+                            <div class="image-upload-area" id="imageUploadArea">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>이미지를 드래그 앤 드롭하거나 클릭하여 선택</p>
+                                    <p class="upload-hint">또는 URL을 입력하세요</p>
+                                </div>
+                                <input type="file" id="imageFileInput" multiple accept="image/*" style="display: none;">
+                            </div>
+                            <textarea id="productImages" class="form-input" rows="3" placeholder="또는 URL을 줄바꿈으로 구분하여 입력 (최대 10개)&#10;https://...&#10;https://..."></textarea>
+                            <div class="image-preview-grid sortable" id="productImagesPreview"></div>
+                        </div>
+                    </div>
+
+                    <!-- 상세 정보 탭 -->
+                    <div class="modal-tab-content" id="productTabDetails">
+                        <div class="form-group">
+                            <label>주요 특징 (줄바꿈으로 구분)</label>
+                            <textarea id="productFeatures" class="form-input" rows="4" placeholder="고급 원목 소재&#10;방수 처리&#10;전문 설치"></textarea>
+                            <small class="form-hint">각 줄이 하나의 특징으로 저장됩니다.</small>
+                        </div>
+                        
+                        <!-- 제품 사양 (키-값 쌍 입력) -->
+                        <div class="form-group">
+                            <label>제품 사양</label>
+                            <div id="productSpecsContainer" class="key-value-container">
+                                <div class="key-value-row">
+                                    <input type="text" class="key-input" placeholder="키 (예: 크기)">
+                                    <input type="text" class="value-input" placeholder="값 (예: 3m x 3m x 2.5m)">
+                                    <button type="button" class="btn btn-sm btn-danger remove-row-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" id="addSpecRowBtn">
+                                <i class="fas fa-plus"></i> 사양 추가
+                            </button>
+                            <small class="form-hint">JSON 형식으로도 입력 가능합니다. 아래 텍스트 영역에 직접 입력하세요.</small>
+                            <textarea id="productSpecs" class="form-input" rows="3" placeholder='{"크기": "3m x 3m x 2.5m", "재질": "고급 원목", "색상": "자연색"}'></textarea>
+                        </div>
+                        
+                        <!-- 제품 옵션 (카테고리별 그룹) -->
+                        <div class="form-group">
+                            <label>제품 옵션</label>
+                            <div id="productOptionsContainer" class="options-container">
+                                <div class="option-group">
+                                    <div class="option-group-header">
+                                        <input type="text" class="option-category-input" placeholder="옵션 카테고리 (예: 크기)">
+                                        <button type="button" class="btn btn-sm btn-danger remove-option-group-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="option-values">
+                                        <input type="text" class="option-value-input" placeholder="옵션 값 (예: 3x3m)">
+                                        <button type="button" class="btn btn-sm btn-secondary add-option-value-btn">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary" id="addOptionGroupBtn">
+                                <i class="fas fa-plus"></i> 옵션 그룹 추가
+                            </button>
+                            <small class="form-hint">JSON 형식으로도 입력 가능합니다. 아래 텍스트 영역에 직접 입력하세요.</small>
+                            <textarea id="productOptions" class="form-input" rows="3" placeholder='{"크기": ["3x3m", "4x4m"], "색상": ["자연색", "다크 브라운"]}'></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelBtn">취소</button>
+                <button type="submit" form="productForm" class="btn btn-primary" id="saveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
