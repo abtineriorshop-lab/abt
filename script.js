@@ -129,73 +129,34 @@ function initHeroVideo() {
             // 2: MEDIA_ERR_NETWORK - 네트워크 오류
             // 3: MEDIA_ERR_DECODE - 디코딩 오류
             // 4: MEDIA_ERR_SRC_NOT_SUPPORTED - 소스 미지원
-            console.warn('영상 로딩 오류 - 코드:', error.code, '메시지:', error.message);
-            
-            // 소스 미지원이면 즉시 다음 소스로
-            if (error.code === 4) {
-                console.log('소스 미지원, 다음 소스 시도...');
-                videoState.hasError = false; // 다음 소스 시도 가능
-                return;
-            }
+            console.warn('로컬 영상 로딩 오류 - 코드:', error.code, '메시지:', error.message);
         } else {
-            console.warn('영상 로딩 오류:', e);
+            console.warn('로컬 영상 로딩 오류:', e);
         }
         
         videoState.hasError = true;
         clearLoadTimeout();
         
-        // 약간의 지연 후 모든 소스 실패 확인 (브라우저가 다음 소스를 시도할 시간 제공)
-        setTimeout(() => {
-            checkAllSourcesFailed();
-        }, 2000);
+        // 로컬 영상만 사용하므로 즉시 대체 이미지 표시
+        console.log('로컬 영상 로딩 실패, 대체 이미지 표시');
+        showVideoFallback();
     });
 
-    // 모든 소스 실패 확인
+    // 로컬 영상 실패 확인 (로컬 영상만 사용하므로 단순화)
     function checkAllSourcesFailed() {
-        const sources = heroVideo.querySelectorAll('source');
-        const currentSrc = heroVideo.currentSrc;
-        
-        // networkState가 NO_SOURCE인 경우 즉시 실패 처리
+        // 로컬 영상만 사용하므로 networkState가 NO_SOURCE이면 즉시 실패 처리
         if (heroVideo.networkState === 3) {
-            console.log('모든 영상 소스 실패 (networkState: NO_SOURCE), 대체 이미지 표시');
+            console.log('로컬 영상 소스 실패 (networkState: NO_SOURCE), 대체 이미지 표시');
             videoState.allSourcesTried = true;
             showVideoFallback();
             return;
         }
         
-        // 현재 사용 중인 소스 찾기
-        let currentSourceIndex = -1;
-        sources.forEach((source, index) => {
-            const sourceSrc = source.src || source.getAttribute('src');
-            if (sourceSrc && currentSrc) {
-                // 정확한 매칭 또는 URL 일부 매칭
-                if (currentSrc === sourceSrc || 
-                    currentSrc.includes(sourceSrc.split('/').pop()) ||
-                    sourceSrc.includes(currentSrc.split('/').pop())) {
-                    currentSourceIndex = index;
-                }
-            }
-        });
-        
-        // currentSrc가 없으면 아직 소스 선택 중
-        if (!currentSrc) {
-            console.log('영상 소스 선택 중...');
-            videoState.allSourcesTried = false;
-            return;
-        }
-        
-        // 마지막 소스까지 시도했는지 확인
-        if (currentSourceIndex >= 0 && currentSourceIndex < sources.length - 1) {
-            console.log(`소스 ${currentSourceIndex + 1}/${sources.length} 실패, 브라우저가 다음 소스 시도 중...`);
-            // 브라우저가 자동으로 다음 소스를 시도하므로 대기
-            videoState.allSourcesTried = false;
-            return;
-        }
-        
-        // 모든 소스가 실패한 경우
-        if (!videoState.allSourcesTried) {
+        // currentSrc가 없거나 로컬 영상 경로가 아니면 실패
+        const currentSrc = heroVideo.currentSrc;
+        if (!currentSrc || !currentSrc.includes('hero-video.mp4')) {
+            console.log('로컬 영상 로드 실패, 대체 이미지 표시');
             videoState.allSourcesTried = true;
-            console.log('모든 영상 소스 실패, 대체 이미지 표시');
             showVideoFallback();
         }
     }
@@ -245,8 +206,8 @@ function initHeroVideo() {
         // 3: NO_SOURCE - 소스를 찾을 수 없음
         
         if (heroVideo.networkState === 3) {
-            // NO_SOURCE - 모든 소스 실패
-            console.warn('모든 영상 소스를 찾을 수 없음');
+            // NO_SOURCE - 로컬 영상 실패
+            console.warn('로컬 영상 소스를 찾을 수 없음, 대체 이미지 표시');
             videoState.hasError = true;
             videoState.allSourcesTried = true;
             showVideoFallback();
@@ -294,23 +255,23 @@ function initHeroVideo() {
                 if (heroVideo.readyState === 0 && !videoState.hasMetadata && !videoState.hasData) {
                     // networkState 재확인
                     if (heroVideo.networkState === 3) {
-                        // NO_SOURCE - 모든 소스 실패
-                        console.warn('영상 로딩 시간 초과 (5초), 모든 소스 실패');
-                        checkAllSourcesFailed();
+                        // NO_SOURCE - 로컬 영상 실패
+                        console.warn('로컬 영상 로딩 시간 초과 (5초), 대체 이미지 표시');
+                        showVideoFallback();
                     } else if (heroVideo.networkState === 1 || heroVideo.networkState === 2) {
                         // IDLE 또는 LOADING - 아직 로딩 중
-                        console.log('영상 아직 로딩 중, 추가 대기...');
+                        console.log('로컬 영상 아직 로딩 중, 추가 대기...');
                         // 5초 더 대기
                         videoState.timeoutId = setTimeout(() => {
                             if (heroVideo.readyState === 0 && !videoState.hasMetadata && !videoState.hasData) {
-                                console.warn('영상 로딩 시간 초과 (총 10초), 모든 소스 실패 확인');
-                                checkAllSourcesFailed();
+                                console.warn('로컬 영상 로딩 시간 초과 (총 10초), 대체 이미지 표시');
+                                showVideoFallback();
                             }
                         }, 5000);
                     } else {
                         // 기타 상태
-                        console.warn('영상 로딩 시간 초과 (5초), 모든 소스 실패 확인');
-                        checkAllSourcesFailed();
+                        console.warn('로컬 영상 로딩 시간 초과 (5초), 대체 이미지 표시');
+                        showVideoFallback();
                     }
                 }
             }, 5000);
