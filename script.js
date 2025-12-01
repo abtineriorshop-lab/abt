@@ -631,12 +631,12 @@ function initContactForm() {
         // Show loading state
         const submitBtn = contactForm.querySelector('button[type="submit"]');
         const originalContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span class="loading"></span> Sending...';
+        submitBtn.innerHTML = '<span class="loading"></span> 전송 중...';
         submitBtn.disabled = true;
         
         // Simulate form submission
         setTimeout(() => {
-            showNotification('Thank you! Your message has been sent successfully.', 'success');
+            showNotification('문의가 성공적으로 접수되었습니다. 빠른 시일 내에 연락드리겠습니다.', 'success');
             
             // Reset form
             contactForm.reset();
@@ -745,38 +745,45 @@ function showNotification(message, type = 'info') {
         </div>
     `;
     
-    // Add styles
+    // Add styles - 중앙 정렬
     notification.style.cssText = `
         position: fixed;
-        top: 20px;
-        right: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
         background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
         color: white;
-        padding: 16px 24px;
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        padding: 20px 32px;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         z-index: 10000;
-        transform: translateX(400px);
-        transition: transform 0.3s ease;
-        max-width: 400px;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 500px;
+        min-width: 300px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
     `;
     
     document.body.appendChild(notification);
     
-    // Animate in
+    // Animate in - 중앙에서 나타남
     setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+        notification.style.transform = 'translate(-50%, -50%) scale(1)';
     }, 100);
     
-    // Remove after 5 seconds
+    // Remove after 4 seconds
     setTimeout(() => {
-        notification.style.transform = 'translateX(400px)';
+        notification.style.opacity = '0';
+        notification.style.transform = 'translate(-50%, -50%) scale(0.8)';
         setTimeout(() => {
             if (document.body.contains(notification)) {
                 document.body.removeChild(notification);
             }
         }, 300);
-    }, 5000);
+    }, 4000);
 }
 
 // Gallery Item Click Handler
