@@ -21,7 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initParallaxEffects();
     initNavbarScroll();
     initMediaOptimization();
-    initAdminTrigger(); // 관리자 트리거 초기화
+    
+    // 관리자 트리거 초기화 (약간의 지연을 두어 DOM이 완전히 로드되도록)
+    setTimeout(() => {
+        initAdminTrigger();
+    }, 100);
 });
 
 // Navigation Functions
@@ -653,8 +657,7 @@ function initContactForm() {
             submitBtn.disabled = false;
         }, 2000);
     });
-}
-
+    
     // Add floating label effect
     const formInputs = contactForm.querySelectorAll('input, textarea, select');
     formInputs.forEach(input => {
