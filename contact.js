@@ -1,17 +1,6 @@
 const CONTACT_FORM_ENDPOINT = 'https://formspree.io/f/xoqgwvvy';
 const LEAD_STORAGE_KEY = 'brightFutureLeads';
 
-// Firebase 함수 import (동적 로드)
-let saveLeadToFirebase = null;
-if (typeof window !== 'undefined') {
-    // firebase-leads.js가 로드되면 함수 사용
-    window.addEventListener('firebaseLeadsLoaded', () => {
-        if (window.saveLeadToFirebase) {
-            saveLeadToFirebase = window.saveLeadToFirebase;
-        }
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contactForm');
     if (!contactForm) return;
@@ -64,10 +53,23 @@ function handleContactForm(form) {
             
             // Firebase에만 저장 (localStorage 제거)
             try {
-                // firebase-leads.js가 로드되어 있으면 사용
-                if (typeof window !== 'undefined' && window.saveLeadToFirebase) {
-                    await window.saveLeadToFirebase(leadPayload);
-                } else if (window.firebaseInitialized && window.firebaseDb) {
+                // Firebase 초기화 대기 (최대 5초)
+                let attempts = 0;
+                while (!window.firebaseInitialized || !window.firebaseDb) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                    if (attempts > 50) { // 5초 타임아웃
+                        throw new Error('Firebase 초기화 타임아웃');
+                    }
+                }
+                
+                console.log('✅ Firebase 초기화 확인 완료');
+                
+                // firebase-leads.js의 함수가 있으면 사용, 없으면 직접 저장
+                if (typeof window.saveLeadToFirebase === 'function') {
+                    const docId = await window.saveLeadToFirebase(leadPayload);
+                    console.log('✅ 문의가 Firebase에 저장되었습니다 (firebase-leads.js):', docId);
+                } else {
                     // 직접 Firebase에 저장
                     const docRef = await window.firebaseDb.collection('leads').add({
                         ...leadPayload,
@@ -76,13 +78,18 @@ function handleContactForm(form) {
                         read: false,
                         updatedAt: new Date().toISOString()
                     });
-                    console.log('✅ 문의가 Firebase에 저장되었습니다:', docRef.id);
-                } else {
-                    throw new Error('Firebase가 초기화되지 않았습니다.');
+                    console.log('✅ 문의가 Firebase에 저장되었습니다 (직접 저장):', docRef.id);
                 }
             } catch (firebaseError) {
                 console.error('❌ Firebase 저장 실패:', firebaseError);
-                showNotification('문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+                console.error('오류 상세:', firebaseError.code, firebaseError.message, firebaseError);
+                if (firebaseError.code === 'permission-denied') {
+                    showNotification('Firestore 보안 규칙을 확인해주세요.', 'error');
+                } else if (firebaseError.message === 'Firebase 초기화 타임아웃') {
+                    showNotification('Firebase 연결 시간이 초과되었습니다. 페이지를 새로고침해주세요.', 'error');
+                } else {
+                    showNotification('문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+                }
                 toggleSubmitButton(submitButton, false);
                 return;
             }

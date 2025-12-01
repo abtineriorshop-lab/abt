@@ -2314,9 +2314,16 @@ async function loadLeads() {
             });
             
             console.log('✅ Firebase에서 문의 로드 완료:', leads.length, '개');
+            displayLeads(); // 문의 목록 표시
         } catch (firebaseError) {
             console.error('❌ Firebase 로드 실패:', firebaseError);
+            console.error('오류 상세:', firebaseError.code, firebaseError.message);
+            if (firebaseError.code === 'permission-denied') {
+                console.warn('⚠️ Firestore 보안 규칙을 확인해주세요.');
+                showNotification('Firestore 보안 규칙을 확인해주세요.', 'error');
+            }
             leads = [];
+            displayLeads(); // 빈 목록이라도 표시
         }
         
         // 상태가 없는 경우 'new'로 설정
