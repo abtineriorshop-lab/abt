@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initParallaxEffects();
     initNavbarScroll();
     initMediaOptimization();
+    initAdminTrigger(); // 관리자 트리거 초기화
 });
 
 // Navigation Functions
@@ -1055,7 +1056,18 @@ preloadImages();
 // Admin Trigger Function
 function initAdminTrigger() {
     const adminTrigger = document.getElementById('adminTrigger');
-    if (!adminTrigger) return;
+    if (!adminTrigger) {
+        console.warn('⚠️ adminTrigger 요소를 찾을 수 없습니다.');
+        return;
+    }
+    
+    console.log('✅ 관리자 트리거 초기화 완료');
+    
+    // 스타일 추가 (클릭 가능하도록)
+    adminTrigger.style.cursor = 'pointer';
+    adminTrigger.style.userSelect = 'none';
+    adminTrigger.style.transition = 'all 0.3s ease';
+    adminTrigger.title = '관리자 모드 진입 (5번 클릭)';
     
     let clickCount = 0;
     let clickTimer = null;
@@ -1064,7 +1076,10 @@ function initAdminTrigger() {
     
     adminTrigger.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         clickCount++;
+        
+        console.log(`관리자 트리거 클릭: ${clickCount}/${requiredClicks}`);
         
         // 클릭 애니메이션 효과
         this.style.transform = 'scale(0.8)';
@@ -1082,6 +1097,7 @@ function initAdminTrigger() {
         
         // 클릭 수가 충족되면 관리자 페이지로 이동
         if (clickCount >= requiredClicks) {
+            console.log('✅ 관리자 모드 진입 트리거 활성화');
             // 성공 애니메이션
             this.style.color = '#d4af37';
             this.style.textShadow = '0 0 20px rgba(212, 175, 55, 0.8)';
@@ -1096,13 +1112,17 @@ function initAdminTrigger() {
         
         // 시간 윈도우 설정
         clickTimer = setTimeout(() => {
+            console.log('관리자 트리거 클릭 카운트 리셋');
             clickCount = 0;
         }, timeWindow);
     });
     
+    // 마우스 오버 효과
+    adminTrigger.addEventListener('mouseenter', function() {
+        this.style.opacity = '0.7';
+    });
+    
+    adminTrigger.addEventListener('mouseleave', function() {
+        this.style.opacity = '1';
+    });
 }
-
-// Initialize admin trigger when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    initAdminTrigger();
-});
