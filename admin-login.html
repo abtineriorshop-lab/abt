@@ -306,40 +306,66 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Firebase 인증 -->
+    <script src="firebase-auth.js"></script>
+    
     <script>
-        // 관리자 로그인 기능
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // 이미 로그인된 경우 대시보드로 리다이렉트
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const user = await checkAdminAuth();
+                if (user) {
+                    window.location.href = 'admin-dashboard.html';
+                }
+            } catch (error) {
+                console.log('인증 확인 중 오류 (정상):', error);
+            }
+        });
+
+        // 관리자 로그인 기능 (Firebase Auth 사용)
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const remember = document.getElementById('remember').checked;
+            
+            // 이메일 형식 확인
+            if (!email.includes('@')) {
+                showError('이메일 형식으로 입력해주세요.');
+                return;
+            }
             
             // 로딩 표시
             document.getElementById('loading').style.display = 'block';
             document.querySelector('.login-btn').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
             
-            // 간단한 인증 (실제 환경에서는 서버 인증 필요)
-            setTimeout(() => {
-                if (username === 'admin' && password === 'admin123') {
-                    // 로그인 성공
-                    if (remember) {
-                        localStorage.setItem('adminLoggedIn', 'true');
-                        localStorage.setItem('adminUsername', username);
-                    } else {
-                        sessionStorage.setItem('adminLoggedIn', 'true');
-                        sessionStorage.setItem('adminUsername', username);
-                    }
-                    
-                    // 관리자 대시보드로 이동
-                    window.location.href = 'admin-dashboard.html';
-                } else {
-                    // 로그인 실패
-                    showError('사용자명 또는 비밀번호가 올바르지 않습니다.');
-                    document.getElementById('loading').style.display = 'none';
-                    document.querySelector('.login-btn').style.display = 'block';
+            try {
+                // Firebase Auth로 로그인
+                const user = await loginAdmin(email, password);
+                
+                if (remember) {
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    localStorage.setItem('adminEmail', user.email);
                 }
-            }, 1500);
+                
+                // 관리자 대시보드로 이동
+                window.location.href = 'admin-dashboard.html';
+            } catch (error) {
+                // 로그인 실패
+                showError(error.message || '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.login-btn').style.display = 'block';
+            }
         });
 
         function showError(message) {
@@ -354,15 +380,10 @@
             }, 5000);
         }
 
-        // 이미 로그인된 경우 대시보드로 리다이렉트
-        if (localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true') {
-            window.location.href = 'admin-dashboard.html';
-        }
-
         // 비밀번호 찾기 기능
         document.querySelector('.forgot-password').addEventListener('click', function(e) {
             e.preventDefault();
-            alert('관리자 비밀번호 찾기는 시스템 관리자에게 문의하세요.\n\n기본 계정: admin / admin123');
+            alert('관리자 비밀번호 찾기는 Firebase Console에서 비밀번호 재설정을 진행하거나 시스템 관리자에게 문의하세요.');
         });
     </script>
 </body>

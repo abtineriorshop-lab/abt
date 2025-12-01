@@ -44,7 +44,15 @@ function handleContactForm(form) {
             return;
         }
 
+        // reCAPTCHA 검증
+        const recaptchaResponse = grecaptcha.getResponse();
+        if (!recaptchaResponse) {
+            showNotification('스팸 방지를 위해 reCAPTCHA를 완료해주세요.', 'error');
+            return;
+        }
+
         const formData = new FormData(form);
+        formData.append('g-recaptcha-response', recaptchaResponse);
         const leadPayload = serializeLead(formData);
         toggleSubmitButton(submitButton, true);
 

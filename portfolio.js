@@ -104,9 +104,18 @@ function renderPortfolioProjects(projects) {
                         <span>${project.area}</span>
                         <span>${project.duration}</span>
                     </div>
+                    <a href="portfolio-detail.html?id=${project.id}" class="portfolio-view-btn" style="margin-top: 16px; display: inline-block; padding: 10px 20px; background: white; color: #667eea; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                        상세보기 <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         `;
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', (e) => {
+            if (!e.target.closest('.portfolio-view-btn')) {
+                window.location.href = `portfolio-detail.html?id=${project.id}`;
+            }
+        });
         portfolioGrid.appendChild(item);
     });
 }

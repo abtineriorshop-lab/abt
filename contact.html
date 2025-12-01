@@ -26,6 +26,64 @@
     <link rel="stylesheet" href="page-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        .file-upload-wrapper {
+            margin-top: 8px;
+        }
+        .file-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #667eea;
+            font-weight: 500;
+        }
+        .file-upload-label:hover {
+            background: #667eea;
+            color: white;
+        }
+        .file-upload-label i {
+            margin-right: 8px;
+        }
+        .file-list {
+            margin-top: 12px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .file-item-name {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+        .file-item-size {
+            color: #666;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+        .file-item-remove {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .file-item-remove:hover {
+            background: #fee;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -477,6 +535,9 @@
     <script src="firebase-leads.js"></script>
     
     <script src="script.js"></script>
+    <!-- 파일 처리 -->
+    <script src="contact-file-handler.js"></script>
+    
     <script src="contact.js"></script>
     <script src="estimate.js"></script>
 </body>

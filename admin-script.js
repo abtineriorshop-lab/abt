@@ -14,7 +14,7 @@ let selectedLeadIds = new Set();
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async function() {
-    initializeAdmin();
+    await initializeAdmin();
     loadAllProducts();
     await loadPortfolioProjects();
     await loadTestimonials();
@@ -26,22 +26,51 @@ document.addEventListener('DOMContentLoaded', async function() {
     displayPortfolioProjects();
     displayTestimonials();
     displayLeads();
+    
+    // Firebase에서 제품 데이터 동기화 시도
+    try {
+        if (window.syncProductsWithFirebase) {
+            const syncedProducts = await window.syncProductsWithFirebase();
+            if (syncedProducts && syncedProducts.length > 0) {
+                products = syncedProducts;
+                featuredProducts = products.filter(p => p.featured);
+                displayProducts();
+                displayFeaturedProducts();
+                updateWebPageProducts();
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Firebase 제품 동기화 실패:', error);
+    }
 });
 
 // 관리자 시스템 초기화
-function initializeAdmin() {
-    // 로그인 상태 확인
-    if (!localStorage.getItem('adminLoggedIn') && !sessionStorage.getItem('adminLoggedIn')) {
-        window.location.href = 'admin-login.html';
-        return;
-    }
-    
-    // 사용자 정보 표시
-    const username = localStorage.getItem('adminUsername') || sessionStorage.getItem('adminUsername');
-    if (username) {
+async function initializeAdmin() {
+    // Firebase 인증 확인
+    try {
+        const user = await checkAdminAuth();
+        if (!user) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+        
+        // 권한 확인
+        const hasPermission = await checkAdminPermission();
+        if (!hasPermission) {
+            alert('관리자 권한이 없습니다.');
+            await logoutAdmin();
+            window.location.href = 'admin-login.html';
+            return;
+        }
+        
+        // 사용자 정보 표시
+        const email = user.email || sessionStorage.getItem('adminEmail') || '관리자';
         document.querySelectorAll('.admin-name').forEach(el => {
-            el.textContent = username;
+            el.textContent = email;
         });
+    } catch (error) {
+        console.error('관리자 초기화 오류:', error);
+        window.location.href = 'admin-login.html';
     }
 }
 
@@ -757,7 +786,7 @@ function setupEventListeners() {
     }
 
     // 로그아웃
-    document.getElementById('logoutLink').addEventListener('click', function(e) {
+    document.getElementById('logoutLink').addEventListener('click', async function(e) {
         e.preventDefault();
         logout();
     });
@@ -1148,12 +1177,24 @@ function showNotification(message, type = 'info') {
 }
 
 // 로그아웃
-function logout() {
-    localStorage.removeItem('adminLoggedIn');
-    sessionStorage.removeItem('adminLoggedIn');
-    localStorage.removeItem('adminUsername');
-    sessionStorage.removeItem('adminUsername');
-    window.location.href = 'admin-login.html';
+async function logout() {
+    try {
+        // Firebase Auth 로그아웃
+        if (window.logoutAdmin) {
+            await window.logoutAdmin();
+        } else {
+            // 폴백: 기존 방식
+            localStorage.removeItem('adminLoggedIn');
+            sessionStorage.removeItem('adminLoggedIn');
+            localStorage.removeItem('adminUsername');
+            sessionStorage.removeItem('adminUsername');
+        }
+        window.location.href = 'admin-login.html';
+    } catch (error) {
+        console.error('로그아웃 오류:', error);
+        // 오류 발생 시에도 로그인 페이지로 이동
+        window.location.href = 'admin-login.html';
+    }
 }
 
 // CSS 스타일 추가
