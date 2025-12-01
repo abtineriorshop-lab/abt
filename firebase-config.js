@@ -12,14 +12,18 @@ const firebaseConfig = {
   measurementId: "G-PF3BM3XH97"
 };
 
-// Firebase 초기화 (CDN 방식 - 브라우저에서 직접 사용)
+// window 객체에 노출 (다른 스크립트에서 사용 가능하도록)
+window.firebaseConfig = firebaseConfig;
+
+// Firebase 초기화 (compat 버전 사용)
 function initializeFirebase() {
+    // compat 버전에서는 firebase 네임스페이스 사용
     if (typeof window !== 'undefined' && typeof firebase !== 'undefined' && !window.firebaseInitialized) {
         try {
             const app = firebase.initializeApp(firebaseConfig);
             window.firebaseApp = app;
-            window.firebaseDb = firebase.firestore(app);
-            window.firebaseAuth = firebase.auth(app);
+            window.firebaseDb = firebase.firestore();
+            window.firebaseAuth = firebase.auth();
             window.firebaseInitialized = true;
             
             // 연결 상태 확인
@@ -98,27 +102,26 @@ function updateFirebaseStatusUI(isConnected, errorMessage = '') {
     }
 }
 
-// DOMContentLoaded 이벤트
-document.addEventListener('DOMContentLoaded', () => {
-    // Firebase SDK가 로드될 때까지 대기
+// Firebase SDK 로드 대기 및 초기화
+(function() {
+    // SDK가 이미 로드된 경우
     if (typeof firebase !== 'undefined') {
         initializeFirebase();
     } else {
         // SDK 로드를 기다림
+        let checkCount = 0;
+        const maxChecks = 50; // 5초 (50 * 100ms)
+        
         const checkInterval = setInterval(() => {
+            checkCount++;
             if (typeof firebase !== 'undefined') {
                 clearInterval(checkInterval);
                 initializeFirebase();
-            }
-        }, 100);
-        
-        // 5초 후 타임아웃
-        setTimeout(() => {
-            clearInterval(checkInterval);
-            if (!window.firebaseInitialized) {
+            } else if (checkCount >= maxChecks) {
+                clearInterval(checkInterval);
                 console.error('❌ Firebase SDK 로드 타임아웃');
                 updateFirebaseStatusUI(false, 'SDK 로드 타임아웃');
             }
-        }, 5000);
+        }, 100);
     }
-});
+})();

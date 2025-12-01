@@ -175,10 +175,10 @@
         <div id="testResult" class="test-result"></div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <!-- Firebase SDK (compat 버전 사용) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Firebase 설정 -->
@@ -188,9 +188,9 @@
         // Firebase 연결 상태 확인
         function checkConnection() {
             const statusCard = document.getElementById('connectionStatus');
-            const projectIdEl = document.getElementById('projectId');
-            const databaseStatusEl = document.getElementById('databaseStatus');
-            const authStatusEl = document.getElementById('authStatus');
+            
+            // firebaseConfig는 firebase-config.js에서 가져옴
+            const projectId = window.firebaseConfig ? window.firebaseConfig.projectId : 'abtinterior-ac593';
             
             if (window.firebaseInitialized && window.firebaseDb) {
                 statusCard.className = 'status-card connected';
@@ -202,7 +202,7 @@
                     <div class="status-details">
                         <div class="detail-item">
                             <span class="detail-label">프로젝트 ID:</span>
-                            <span class="detail-value">${firebaseConfig.projectId}</span>
+                            <span class="detail-value">${projectId}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">데이터베이스:</span>
@@ -224,7 +224,7 @@
                     <div class="status-details">
                         <div class="detail-item">
                             <span class="detail-label">프로젝트 ID:</span>
-                            <span class="detail-value">${firebaseConfig.projectId || '확인 불가'}</span>
+                            <span class="detail-value">${projectId}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">데이터베이스:</span>
