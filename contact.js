@@ -48,62 +48,70 @@ function handleContactForm(form) {
         const leadPayload = serializeLead(formData);
         toggleSubmitButton(submitButton, true);
 
+        // Formspree 제출 시도 (실패해도 Firebase 저장은 계속 진행)
+        let formspreeSuccess = false;
         try {
             await submitPrimaryEndpoint(endpoint, formData);
-            
-            // Firebase에만 저장 (localStorage 제거)
-            try {
-                // Firebase 초기화 대기 (최대 5초)
-                let attempts = 0;
-                while (!window.firebaseInitialized || !window.firebaseDb) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    attempts++;
-                    if (attempts > 50) { // 5초 타임아웃
-                        throw new Error('Firebase 초기화 타임아웃');
-                    }
+            formspreeSuccess = true;
+            console.log('✅ Formspree 제출 성공');
+        } catch (formspreeError) {
+            console.warn('⚠️ Formspree 제출 실패 (Firebase 저장은 계속 진행):', formspreeError.message);
+            // Formspree 실패해도 Firebase 저장은 계속 진행
+        }
+        
+        // Firebase에만 저장 (localStorage 제거) - Formspree 성공/실패와 무관하게 실행
+        try {
+            // Firebase 초기화 대기 (최대 5초)
+            let attempts = 0;
+            while (!window.firebaseInitialized || !window.firebaseDb) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+                if (attempts > 50) { // 5초 타임아웃
+                    throw new Error('Firebase 초기화 타임아웃');
                 }
-                
-                console.log('✅ Firebase 초기화 확인 완료');
-                
-                // firebase-leads.js의 함수가 있으면 사용, 없으면 직접 저장
-                if (typeof window.saveLeadToFirebase === 'function') {
-                    const docId = await window.saveLeadToFirebase(leadPayload);
-                    console.log('✅ 문의가 Firebase에 저장되었습니다 (firebase-leads.js):', docId);
-                } else {
-                    // 직접 Firebase에 저장
-                    const docRef = await window.firebaseDb.collection('leads').add({
-                        ...leadPayload,
-                        createdAt: new Date().toISOString(),
-                        status: 'new',
-                        read: false,
-                        updatedAt: new Date().toISOString()
-                    });
-                    console.log('✅ 문의가 Firebase에 저장되었습니다 (직접 저장):', docRef.id);
-                }
-            } catch (firebaseError) {
-                console.error('❌ Firebase 저장 실패:', firebaseError);
-                console.error('오류 상세:', firebaseError.code, firebaseError.message, firebaseError);
-                if (firebaseError.code === 'permission-denied') {
-                    showNotification('Firestore 보안 규칙을 확인해주세요.', 'error');
-                } else if (firebaseError.message === 'Firebase 초기화 타임아웃') {
-                    showNotification('Firebase 연결 시간이 초과되었습니다. 페이지를 새로고침해주세요.', 'error');
-                } else {
-                    showNotification('문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
-                }
-                toggleSubmitButton(submitButton, false);
-                return;
             }
             
-            await Promise.all([
-                crmEndpoint ? sendLeadToEndpoint(crmEndpoint, leadPayload) : Promise.resolve(),
-                webhookEndpoint ? sendWebhook(webhookEndpoint, leadPayload) : Promise.resolve()
-            ]);
+            console.log('✅ Firebase 초기화 확인 완료');
+            
+            // firebase-leads.js의 함수가 있으면 사용, 없으면 직접 저장
+            if (typeof window.saveLeadToFirebase === 'function') {
+                const docId = await window.saveLeadToFirebase(leadPayload);
+                console.log('✅ 문의가 Firebase에 저장되었습니다 (firebase-leads.js):', docId);
+            } else {
+                // 직접 Firebase에 저장
+                const docRef = await window.firebaseDb.collection('leads').add({
+                    ...leadPayload,
+                    createdAt: new Date().toISOString(),
+                    status: 'new',
+                    read: false,
+                    updatedAt: new Date().toISOString()
+                });
+                console.log('✅ 문의가 Firebase에 저장되었습니다 (직접 저장):', docRef.id);
+            }
+            
+            // Firebase 저장 성공 후 추가 작업 (실패해도 무시)
+            try {
+                await Promise.all([
+                    crmEndpoint ? sendLeadToEndpoint(crmEndpoint, leadPayload) : Promise.resolve(),
+                    webhookEndpoint ? sendWebhook(webhookEndpoint, leadPayload) : Promise.resolve()
+                ]);
+            } catch (additionalError) {
+                console.warn('⚠️ 추가 엔드포인트 전송 실패 (무시):', additionalError);
+            }
 
-            showNotification('문의가 접수되었습니다. 24시간 내 회신 드립니다.', 'success');
+            // Firebase 저장 성공 시 성공 메시지 표시
+            showNotification('문의가 접수되었습니다. 24시간 내 회신 드리겠습니다.', 'success');
             form.reset();
-        } catch (error) {
-            console.error(error);
-            showNotification('제출 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        } catch (firebaseError) {
+            console.error('❌ Firebase 저장 실패:', firebaseError);
+            console.error('오류 상세:', firebaseError.code, firebaseError.message, firebaseError);
+            if (firebaseError.code === 'permission-denied') {
+                showNotification('Firestore 보안 규칙을 확인해주세요.', 'error');
+            } else if (firebaseError.message === 'Firebase 초기화 타임아웃') {
+                showNotification('Firebase 연결 시간이 초과되었습니다. 페이지를 새로고침해주세요.', 'error');
+            } else {
+                showNotification('문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+            }
         } finally {
             toggleSubmitButton(submitButton, false);
         }
