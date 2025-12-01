@@ -2472,7 +2472,7 @@ function viewLeadDetail(leadId) {
 }
 
 // 문의 상태 업데이트
-function updateLeadStatus() {
+async function updateLeadStatus() {
     const modal = document.getElementById('leadDetailModal');
     const leadId = modal.dataset.currentLeadId;
     if (!leadId) return;
@@ -2646,7 +2646,7 @@ function updateLeadSelectionUI() {
 }
 
 // 선택된 문의 삭제
-function deleteSelectedLeads() {
+async function deleteSelectedLeads() {
     if (selectedLeadIds.size === 0) return;
     if (!confirm(`선택한 ${selectedLeadIds.size}개의 문의를 삭제하시겠습니까?`)) return;
     
