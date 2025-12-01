@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase 연결 확인 - 밝은내일</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .status-card {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+        .status-card.connected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .status-card.disconnected {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        .status-card.checking {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .status-icon {
+            font-size: 24px;
+        }
+        .status-icon.connected {
+            color: #10b981;
+        }
+        .status-icon.disconnected {
+            color: #ef4444;
+        }
+        .status-icon.checking {
+            color: #f59e0b;
+        }
+        .status-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+        .detail-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #1a1a1a;
+            font-family: 'Courier New', monospace;
+        }
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+        }
+        .test-result.success {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+            color: #065f46;
+            display: block;
+        }
+        .test-result.error {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            display: block;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase 연결 확인</h1>
+        
+        <div id="connectionStatus" class="status-card checking">
+            <div class="status-header">
+                <i class="fas fa-spinner fa-spin status-icon checking"></i>
+                <span>연결 확인 중...</span>
+            </div>
+            <div class="status-details" id="statusDetails">
+                <div class="detail-item">
+                    <span class="detail-label">프로젝트 ID:</span>
+                    <span class="detail-value" id="projectId">확인 중...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">데이터베이스:</span>
+                    <span class="detail-value" id="databaseStatus">확인 중...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">인증:</span>
+                    <span class="detail-value" id="authStatus">확인 중...</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="testButton" class="test-button" onclick="testFirebaseConnection()">
+            <i class="fas fa-vial"></i> 연결 테스트
+        </button>
+        
+        <div id="testResult" class="test-result"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase 설정 -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Firebase 연결 상태 확인
+        function checkConnection() {
+            const statusCard = document.getElementById('connectionStatus');
+            const projectIdEl = document.getElementById('projectId');
+            const databaseStatusEl = document.getElementById('databaseStatus');
+            const authStatusEl = document.getElementById('authStatus');
+            
+            if (window.firebaseInitialized && window.firebaseDb) {
+                statusCard.className = 'status-card connected';
+                statusCard.innerHTML = `
+                    <div class="status-header">
+                        <i class="fas fa-check-circle status-icon connected"></i>
+                        <span>✅ Firebase 연결됨</span>
+                    </div>
+                    <div class="status-details">
+                        <div class="detail-item">
+                            <span class="detail-label">프로젝트 ID:</span>
+                            <span class="detail-value">${firebaseConfig.projectId}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">데이터베이스:</span>
+                            <span class="detail-value">✅ 연결됨</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">인증:</span>
+                            <span class="detail-value">✅ 초기화됨</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                statusCard.className = 'status-card disconnected';
+                statusCard.innerHTML = `
+                    <div class="status-header">
+                        <i class="fas fa-times-circle status-icon disconnected"></i>
+                        <span>❌ Firebase 연결 실패</span>
+                    </div>
+                    <div class="status-details">
+                        <div class="detail-item">
+                            <span class="detail-label">프로젝트 ID:</span>
+                            <span class="detail-value">${firebaseConfig.projectId || '확인 불가'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">데이터베이스:</span>
+                            <span class="detail-value">❌ 연결 안 됨</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">인증:</span>
+                            <span class="detail-value">❌ 초기화 안 됨</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Firebase 연결 테스트
+        async function testFirebaseConnection() {
+            const testButton = document.getElementById('testButton');
+            const testResult = document.getElementById('testResult');
+            
+            testButton.disabled = true;
+            testButton.innerHTML = '<span class="loading"></span> 테스트 중...';
+            testResult.className = 'test-result';
+            testResult.innerHTML = '';
+            
+            try {
+                if (!window.firebaseInitialized || !window.firebaseDb) {
+                    throw new Error('Firebase가 초기화되지 않았습니다.');
+                }
+                
+                // 테스트 데이터 저장
+                const testData = {
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    message: 'Firebase 연결 테스트'
+                };
+                
+                const docRef = await window.firebaseDb.collection('leads').add(testData);
+                console.log('✅ 테스트 데이터 저장 성공:', docRef.id);
+                
+                // 테스트 데이터 읽기
+                const doc = await window.firebaseDb.collection('leads').doc(docRef.id).get();
+                if (doc.exists) {
+                    // 테스트 데이터 삭제
+                    await window.firebaseDb.collection('leads').doc(docRef.id).delete();
+                    
+                    testResult.className = 'test-result success';
+                    testResult.innerHTML = `
+                        <strong>✅ 연결 테스트 성공!</strong><br>
+                        Firebase에 데이터를 저장하고 읽는 것이 정상적으로 작동합니다.<br>
+                        테스트 문서 ID: ${docRef.id}
+                    `;
+                } else {
+                    throw new Error('저장된 데이터를 읽을 수 없습니다.');
+                }
+            } catch (error) {
+                console.error('❌ 연결 테스트 실패:', error);
+                testResult.className = 'test-result error';
+                testResult.innerHTML = `
+                    <strong>❌ 연결 테스트 실패</strong><br>
+                    오류: ${error.message}<br>
+                    ${error.code ? `오류 코드: ${error.code}` : ''}
+                `;
+            } finally {
+                testButton.disabled = false;
+                testButton.innerHTML = '<i class="fas fa-vial"></i> 연결 테스트';
+            }
+        }
+        
+        // 주기적으로 연결 상태 확인
+        setInterval(() => {
+            checkConnection();
+        }, 2000);
+        
+        // 초기 확인
+        setTimeout(() => {
+            checkConnection();
+        }, 1000);
+    </script>
+</body>
+</html>
+

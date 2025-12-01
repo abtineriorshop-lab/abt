@@ -618,7 +618,13 @@ function showCollectionModal(category) {
 }
 
 // Contact Form Functions
+// contact.js가 있으면 contact.js를 사용하고, 없으면 기본 동작 수행
 function initContactForm() {
+    // contact.js가 로드되어 있으면 중복 처리 방지
+    if (typeof handleContactForm !== 'undefined') {
+        return;
+    }
+    
     if (!contactForm) return;
 
     contactForm.addEventListener('submit', (e) => {
@@ -646,6 +652,7 @@ function initContactForm() {
             submitBtn.disabled = false;
         }, 2000);
     });
+}
 
     // Add floating label effect
     const formInputs = contactForm.querySelectorAll('input, textarea, select');

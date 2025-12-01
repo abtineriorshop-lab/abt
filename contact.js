@@ -1,6 +1,17 @@
 const CONTACT_FORM_ENDPOINT = 'https://formspree.io/f/xoqgwvvy';
 const LEAD_STORAGE_KEY = 'brightFutureLeads';
 
+// Firebase 함수 import (동적 로드)
+let saveLeadToFirebase = null;
+if (typeof window !== 'undefined') {
+    // firebase-leads.js가 로드되면 함수 사용
+    window.addEventListener('firebaseLeadsLoaded', () => {
+        if (window.saveLeadToFirebase) {
+            saveLeadToFirebase = window.saveLeadToFirebase;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contactForm');
     if (!contactForm) return;
@@ -50,7 +61,32 @@ function handleContactForm(form) {
 
         try {
             await submitPrimaryEndpoint(endpoint, formData);
-            persistLeadLocally(leadPayload);
+            
+            // Firebase에만 저장 (localStorage 제거)
+            try {
+                // firebase-leads.js가 로드되어 있으면 사용
+                if (typeof window !== 'undefined' && window.saveLeadToFirebase) {
+                    await window.saveLeadToFirebase(leadPayload);
+                } else if (window.firebaseInitialized && window.firebaseDb) {
+                    // 직접 Firebase에 저장
+                    const docRef = await window.firebaseDb.collection('leads').add({
+                        ...leadPayload,
+                        createdAt: new Date().toISOString(),
+                        status: 'new',
+                        read: false,
+                        updatedAt: new Date().toISOString()
+                    });
+                    console.log('✅ 문의가 Firebase에 저장되었습니다:', docRef.id);
+                } else {
+                    throw new Error('Firebase가 초기화되지 않았습니다.');
+                }
+            } catch (firebaseError) {
+                console.error('❌ Firebase 저장 실패:', firebaseError);
+                showNotification('문의 저장에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+                toggleSubmitButton(submitButton, false);
+                return;
+            }
+            
             await Promise.all([
                 crmEndpoint ? sendLeadToEndpoint(crmEndpoint, leadPayload) : Promise.resolve(),
                 webhookEndpoint ? sendWebhook(webhookEndpoint, leadPayload) : Promise.resolve()
@@ -89,15 +125,10 @@ function serializeLead(formData) {
     return payload;
 }
 
-function persistLeadLocally(lead) {
-    try {
-        const existing = JSON.parse(localStorage.getItem(LEAD_STORAGE_KEY) || '[]');
-        existing.unshift(lead);
-        localStorage.setItem(LEAD_STORAGE_KEY, JSON.stringify(existing.slice(0, 50)));
-    } catch (error) {
-        console.error('로컬 리드 저장 실패:', error);
-    }
-}
+// localStorage 저장 제거 - Firebase만 사용
+// function persistLeadLocally(lead) {
+//     // Firebase만 사용하므로 제거됨
+// }
 
 async function sendLeadToEndpoint(url, payload) {
     try {

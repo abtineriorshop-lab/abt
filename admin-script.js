@@ -2280,11 +2280,45 @@ function populateOptionsForm(options) {
 
 // ==================== 문의/리드 관리 ====================
 
-// 문의/리드 로드
-function loadLeads() {
+// 문의/리드 로드 - Firebase만 사용
+async function loadLeads() {
     try {
-        const stored = localStorage.getItem('brightFutureLeads');
-        leads = stored ? JSON.parse(stored) : [];
+        // Firebase 연결 확인
+        if (!window.firebaseInitialized || !window.firebaseDb) {
+            console.warn('⚠️ Firebase가 초기화되지 않았습니다. 잠시 후 다시 시도합니다...');
+            // 2초 후 재시도
+            setTimeout(() => {
+                if (window.firebaseInitialized && window.firebaseDb) {
+                    loadLeads();
+                } else {
+                    console.error('❌ Firebase 연결 실패');
+                    leads = [];
+                    displayLeads();
+                }
+            }, 2000);
+            return;
+        }
+
+        try {
+            const querySnapshot = await window.firebaseDb.collection('leads')
+                .orderBy('createdAt', 'desc')
+                .get();
+            
+            leads = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                leads.push({
+                    id: doc.id,
+                    ...data
+                });
+            });
+            
+            console.log('✅ Firebase에서 문의 로드 완료:', leads.length, '개');
+        } catch (firebaseError) {
+            console.error('❌ Firebase 로드 실패:', firebaseError);
+            leads = [];
+        }
+        
         // 상태가 없는 경우 'new'로 설정
         leads.forEach(lead => {
             if (!lead.status) {
@@ -2295,7 +2329,7 @@ function loadLeads() {
             }
         });
     } catch (error) {
-        console.error('문의 로드 오류:', error);
+        console.error('❌ 문의 로드 오류:', error);
         leads = [];
     }
 }
@@ -2455,22 +2489,53 @@ function updateLeadStatus() {
     }
     
     // LocalStorage 업데이트
-    localStorage.setItem('brightFutureLeads', JSON.stringify(leads));
+    // Firebase에만 업데이트 (localStorage 제거)
+    if (window.firebaseInitialized && window.firebaseDb && lead.id && lead.id.length < 30) {
+        // Firebase 문서 ID인 경우 (일반적으로 20자 이하)
+        try {
+            await window.firebaseDb.collection('leads').doc(lead.id).update({
+                status: lead.status,
+                notes: lead.notes || '',
+                updatedAt: new Date().toISOString()
+            });
+            console.log('✅ Firebase 문의 상태 업데이트 완료');
+        } catch (error) {
+            console.error('❌ Firebase 업데이트 실패:', error);
+            showNotification('상태 업데이트에 실패했습니다.', 'error');
+            return;
+        }
+    } else {
+        console.warn('⚠️ Firebase가 초기화되지 않았거나 유효하지 않은 문서 ID입니다.');
+        showNotification('Firebase 연결을 확인해주세요.', 'error');
+        return;
+    }
     
     showNotification('문의 상태가 업데이트되었습니다.', 'success');
     displayLeads();
     closeLeadDetailModal();
 }
 
-// 문의 삭제
-function deleteLead(leadId) {
+// 문의 삭제 - Firebase만 사용
+async function deleteLead(leadId) {
     if (confirm('정말로 이 문의를 삭제하시겠습니까?')) {
         const index = leads.findIndex(l => (l.id || l.createdAt) === leadId);
         if (index !== -1) {
-            leads.splice(index, 1);
-            localStorage.setItem('brightFutureLeads', JSON.stringify(leads));
-            showNotification('문의가 성공적으로 삭제되었습니다.', 'success');
-            displayLeads();
+            // Firebase에서만 삭제
+            if (window.firebaseInitialized && window.firebaseDb && leadId && leadId.length < 30) {
+                try {
+                    await window.firebaseDb.collection('leads').doc(leadId).delete();
+                    console.log('✅ Firebase에서 문의 삭제 완료');
+                    leads.splice(index, 1);
+                    showNotification('문의가 성공적으로 삭제되었습니다.', 'success');
+                    displayLeads();
+                } catch (error) {
+                    console.error('❌ Firebase 삭제 실패:', error);
+                    showNotification('문의 삭제에 실패했습니다.', 'error');
+                }
+            } else {
+                console.warn('⚠️ Firebase가 초기화되지 않았거나 유효하지 않은 문서 ID입니다.');
+                showNotification('Firebase 연결을 확인해주세요.', 'error');
+            }
         }
     }
 }
@@ -2585,13 +2650,33 @@ function deleteSelectedLeads() {
     if (selectedLeadIds.size === 0) return;
     if (!confirm(`선택한 ${selectedLeadIds.size}개의 문의를 삭제하시겠습니까?`)) return;
     
-    const count = selectedLeadIds.size;
-    leads = leads.filter(l => !selectedLeadIds.has(l.id || l.createdAt));
-    localStorage.setItem('brightFutureLeads', JSON.stringify(leads));
+    // Firebase에서만 삭제 (localStorage 제거)
+    let deletedCount = 0;
+    const leadIdsToDelete = Array.from(selectedLeadIds);
+    
+    for (const leadId of leadIdsToDelete) {
+        if (window.firebaseInitialized && window.firebaseDb && leadId && leadId.length < 30) {
+            try {
+                await window.firebaseDb.collection('leads').doc(leadId).delete();
+                const index = leads.findIndex(l => (l.id || l.createdAt) === leadId);
+                if (index !== -1) {
+                    leads.splice(index, 1);
+                    deletedCount++;
+                }
+            } catch (error) {
+                console.error(`❌ 문의 ${leadId} 삭제 실패:`, error);
+            }
+        }
+    }
+    
     selectedLeadIds.clear();
-    showNotification(`${count}개의 문의가 삭제되었습니다.`, 'success');
-    displayLeads();
-    updateLeadSelectionUI();
+    if (deletedCount > 0) {
+        showNotification(`${deletedCount}개의 문의가 삭제되었습니다.`, 'success');
+        displayLeads();
+        updateLeadSelectionUI();
+    } else {
+        showNotification('삭제할 문의를 선택해주세요.', 'error');
+    }
 }
 
 // ==================== 대량 편집 기능 ====================

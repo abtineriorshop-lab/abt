@@ -496,25 +496,26 @@
                 </div>
 
                 <div class="contact-form">
-                    <form class="modern-form">
+                    <form class="modern-form" id="contactForm" data-endpoint="https://formspree.io/f/xoqgwvvy" method="POST">
+                        <input type="hidden" name="form-name" value="brightfuture-contact">
                         <div class="form-row">
                             <div class="form-group">
-                                <input type="text" placeholder="이름" required>
+                                <input type="text" name="name" placeholder="이름" required>
                             </div>
                             <div class="form-group">
-                                <input type="text" placeholder="연락처" required>
+                                <input type="tel" name="phone" placeholder="연락처" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <input type="email" placeholder="이메일" required>
+                                <input type="email" name="email" placeholder="이메일" required>
                             </div>
                             <div class="form-group">
-                                <input type="text" placeholder="회사명/사업장명" required>
+                                <input type="text" name="company" placeholder="회사명/사업장명">
                             </div>
                         </div>
                         <div class="form-group">
-                            <select required>
+                            <select name="projectType" required>
                                 <option value="">문의 유형 선택</option>
                                 <option value="pension">펜션 인테리어</option>
                                 <option value="cafe">대형카페 인테리어</option>
@@ -526,9 +527,9 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <textarea placeholder="프로젝트 상세 내용을 입력해주세요..." rows="5" required></textarea>
+                            <textarea name="message" placeholder="프로젝트 상세 내용을 입력해주세요..." rows="5" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary submit-btn">
                             <span>문의하기</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
@@ -606,6 +607,17 @@
         </div>
     </footer>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    
+    <!-- Firebase 설정 및 초기화 -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Firebase 문의 관리 -->
+    <script src="firebase-leads.js"></script>
+    
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
