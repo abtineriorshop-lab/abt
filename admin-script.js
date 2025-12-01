@@ -2416,62 +2416,136 @@ function viewLeadDetail(leadId) {
         minute: '2-digit'
     });
     
+    const statusBadgeClass = lead.status === 'completed' ? 'completed' : lead.status === 'in-progress' ? 'in-progress' : lead.status === 'archived' ? 'archived' : 'new';
+    const statusBadgeText = getLeadStatusText(lead.status);
+    
     content.innerHTML = `
-        <div class="lead-detail-section">
-            <h4>기본 정보</h4>
-            <div class="lead-detail-grid">
-                <div class="lead-detail-item">
-                    <label>이름</label>
-                    <div>${lead.name || lead.이름 || '-'}</div>
+        <div class="lead-detail-header">
+            <div class="lead-detail-header-left">
+                <div class="lead-detail-avatar">
+                    <i class="fas fa-user"></i>
                 </div>
-                <div class="lead-detail-item">
-                    <label>이메일</label>
-                    <div><a href="mailto:${lead.email || lead.이메일 || ''}">${lead.email || lead.이메일 || '-'}</a></div>
-                </div>
-                <div class="lead-detail-item">
-                    <label>전화번호</label>
-                    <div><a href="tel:${lead.phone || lead.전화번호 || lead.phoneNumber || ''}">${lead.phone || lead.전화번호 || lead.phoneNumber || '-'}</a></div>
-                </div>
-                <div class="lead-detail-item">
-                    <label>프로젝트 유형</label>
-                    <div>${lead.projectType || lead.프로젝트유형 || '-'}</div>
-                </div>
-                <div class="lead-detail-item">
-                    <label>제품</label>
-                    <div>${lead.product || lead.제품 || '-'}</div>
-                </div>
-                <div class="lead-detail-item">
-                    <label>상태</label>
-                    <select id="leadDetailStatus" class="form-input">
-                        <option value="new" ${lead.status === 'new' ? 'selected' : ''}>신규</option>
-                        <option value="in-progress" ${lead.status === 'in-progress' ? 'selected' : ''}>진행중</option>
-                        <option value="completed" ${lead.status === 'completed' ? 'selected' : ''}>완료</option>
-                        <option value="archived" ${lead.status === 'archived' ? 'selected' : ''}>보관</option>
-                    </select>
-                </div>
-                <div class="lead-detail-item">
-                    <label>접수일시</label>
-                    <div>${formattedDate}</div>
+                <div class="lead-detail-header-info">
+                    <h2 class="lead-detail-name">${lead.name || lead.이름 || '익명'}</h2>
+                    <div class="lead-detail-meta">
+                        <span class="lead-detail-date"><i class="fas fa-clock"></i> ${formattedDate}</span>
+                        <span class="lead-detail-status-badge ${statusBadgeClass}">${statusBadgeText}</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="lead-detail-section">
-            <h4>문의 내용</h4>
-            <div class="lead-detail-message">
-                ${(lead.message || lead.문의내용 || lead.내용 || '-').replace(/\n/g, '<br>')}
+        
+        <div class="lead-detail-content">
+            <div class="lead-detail-section">
+                <div class="lead-detail-section-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h4>연락처 정보</h4>
+                </div>
+                <div class="lead-detail-info-grid">
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>이메일</label>
+                            <div><a href="mailto:${lead.email || lead.이메일 || ''}" class="lead-detail-link">${lead.email || lead.이메일 || '-'}</a></div>
+                        </div>
+                    </div>
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>전화번호</label>
+                            <div><a href="tel:${lead.phone || lead.전화번호 || lead.phoneNumber || ''}" class="lead-detail-link">${lead.phone || lead.전화번호 || lead.phoneNumber || '-'}</a></div>
+                        </div>
+                    </div>
+                    ${lead.company || lead.회사명 ? `
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>회사/사업장</label>
+                            <div>${lead.company || lead.회사명 || '-'}</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <div class="lead-detail-section">
+                <div class="lead-detail-section-header">
+                    <i class="fas fa-briefcase"></i>
+                    <h4>프로젝트 정보</h4>
+                </div>
+                <div class="lead-detail-info-grid">
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>프로젝트 유형</label>
+                            <div class="lead-detail-value">${lead.projectType || lead.프로젝트유형 || '-'}</div>
+                        </div>
+                    </div>
+                    ${lead.product || lead.제품 ? `
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>관심 제품</label>
+                            <div class="lead-detail-value">${lead.product || lead.제품 || '-'}</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                    ${lead.budget ? `
+                    <div class="lead-detail-info-item">
+                        <div class="lead-detail-info-icon">
+                            <i class="fas fa-won-sign"></i>
+                        </div>
+                        <div class="lead-detail-info-content">
+                            <label>예산</label>
+                            <div class="lead-detail-value">${Number(lead.budget).toLocaleString()}원</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <div class="lead-detail-section">
+                <div class="lead-detail-section-header">
+                    <i class="fas fa-comment-alt"></i>
+                    <h4>문의 내용</h4>
+                </div>
+                <div class="lead-detail-message">
+                    ${(lead.message || lead.문의내용 || lead.내용 || '문의 내용이 없습니다.').replace(/\n/g, '<br>')}
+                </div>
+            </div>
+            
+            <div class="lead-detail-section">
+                <div class="lead-detail-section-header">
+                    <i class="fas fa-cog"></i>
+                    <h4>관리 설정</h4>
+                </div>
+                <div class="lead-detail-controls">
+                    <div class="lead-detail-control-item">
+                        <label for="leadDetailStatus">상태 변경</label>
+                        <select id="leadDetailStatus" class="form-input lead-detail-status-select">
+                            <option value="new" ${lead.status === 'new' ? 'selected' : ''}>신규</option>
+                            <option value="in-progress" ${lead.status === 'in-progress' ? 'selected' : ''}>진행중</option>
+                            <option value="completed" ${lead.status === 'completed' ? 'selected' : ''}>완료</option>
+                            <option value="archived" ${lead.status === 'archived' ? 'selected' : ''}>보관</option>
+                        </select>
+                    </div>
+                    <div class="lead-detail-control-item full-width">
+                        <label for="leadDetailNotes">메모</label>
+                        <textarea id="leadDetailNotes" class="form-input" rows="4" placeholder="문의에 대한 메모를 입력하세요...">${lead.notes || ''}</textarea>
+                    </div>
+                </div>
             </div>
         </div>
-        ${lead.notes ? `
-        <div class="lead-detail-section">
-            <h4>메모</h4>
-            <textarea id="leadDetailNotes" class="form-input" rows="3">${lead.notes}</textarea>
-        </div>
-        ` : `
-        <div class="lead-detail-section">
-            <h4>메모</h4>
-            <textarea id="leadDetailNotes" class="form-input" rows="3" placeholder="메모를 입력하세요..."></textarea>
-        </div>
-        `}
     `;
     
     modal.dataset.currentLeadId = leadId;
