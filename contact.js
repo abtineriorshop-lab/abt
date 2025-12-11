@@ -1,4 +1,4 @@
-const CONTACT_FORM_ENDPOINT = 'https://formspree.io/f/xoqgwvvy';
+const CONTACT_FORM_ENDPOINT = 'https://formspree.io/f/xwpgweje';
 const LEAD_STORAGE_KEY = 'brightFutureLeads';
 
 document.addEventListener('DOMContentLoaded', () => {
